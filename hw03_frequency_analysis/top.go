@@ -6,84 +6,86 @@ import (
 	"strings"
 )
 
-type kv struct {
-	k string
-	v int
+const resultLen = 10
+
+var validWordRegexp = regexp.MustCompile(`^[a-zA-Zа-яА-Я]|[^\w-]|^\d+`)
+
+type keyValue struct {
+	key   string
+	value int
 }
 
 func Top10(s string) []string {
 	words := strings.Fields(s)
-	n := len(words)
-	if n == 0 {
-		return []string{}
+	if len(words) == 0 {
+		return nil
 	}
 
-	kvs := makeKvs(words)
-	sortKvs(kvs)
+	keyValues := makeKeyValueSlice(words)
+	sortKeyValuesByDesc(keyValues)
 
-	return getFirstUpTo(kvs, 10)
+	return getFirstUpTo(keyValues, resultLen)
 }
 
-func makeKvs(ss []string) []kv {
-	n := len(ss)
-	kvs := make([]kv, n)
-	idxmap := make(map[string]int, n)
+func makeKeyValueSlice(words []string) []keyValue {
+	n := len(words)
+	result := make([]keyValue, n)
+	wordIndexes := make(map[string]int, n)
 	excludedWords := make(map[string]struct{}, n)
-	rexp := regexp.MustCompile(`^[a-zA-Zа-яА-Я]|[^\w-]|^\d+`)
 
 	for i := 0; i < n; i++ {
-		word := prepareWord(ss[i])
+		word := prepareWord(words[i])
 
 		if _, ok := excludedWords[word]; ok {
 			continue
 		}
-		if !isStringValid(rexp, word) {
+		if !isWordValid(word) {
 			excludedWords[word] = struct{}{}
 			continue
 		}
 
-		if _, ok := idxmap[word]; ok {
-			kvs[idxmap[word]].v++
+		if _, ok := wordIndexes[word]; ok {
+			result[wordIndexes[word]].value++
 			continue
 		}
 
-		idxmap[word] = i
-		kvs[i] = kv{
-			k: word,
-			v: 1,
+		wordIndexes[word] = i
+		result[i] = keyValue{
+			key:   word,
+			value: 1,
 		}
 	}
 
-	return kvs
+	return result
 }
 
 func prepareWord(s string) string {
 	return strings.TrimRight(strings.ToLower(s), ".")
 }
 
-func isStringValid(rexp *regexp.Regexp, s string) bool {
-	return rexp.MatchString(s)
+func isWordValid(s string) bool {
+	return validWordRegexp.MatchString(s)
 }
 
-func sortKvs(kvs []kv) {
+func sortKeyValuesByDesc(kvs []keyValue) {
 	sort.Slice(kvs, func(i, j int) bool {
-		return kvs[i].v > kvs[j].v || (kvs[i].v == kvs[j].v && kvs[i].k < kvs[j].k)
+		return kvs[i].value > kvs[j].value || (kvs[i].value == kvs[j].value && kvs[i].key < kvs[j].key)
 	})
 }
 
-func getFirstUpTo(kvs []kv, toIdx int) []string {
-	n := toIdx
+func getFirstUpTo(kvs []keyValue, max int) []string {
+	n := max
 	if n > len(kvs) {
 		n = len(kvs)
 	}
 
 	res := make([]string, 0, n)
 	for i := 0; i < n; i++ {
-		if kvs[i].v == 0 {
+		if kvs[i].value == 0 {
 			continue
 		}
 
-		res = append(res, kvs[i].k)
+		res = append(res, kvs[i].key)
 	}
 
 	return res

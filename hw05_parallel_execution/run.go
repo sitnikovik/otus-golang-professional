@@ -18,41 +18,43 @@ func Run(tasks []Task, n, m int) error {
 
 	var errCnt int32
 	var wg sync.WaitGroup
+	taskCh := make(chan Task, len(tasks))
 
-	wg.Add(len(tasks))
-	limitCh := make(chan struct{}, n)
-	stopCh := make(chan struct{})
+	// Start n workers in goroutines.
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go func() {
+			defer wg.Done()
 
-	for i := 0; i < len(tasks); i++ {
-		limitCh <- struct{}{}
-		go func(fn func() error) {
-			defer func() {
-				<-limitCh
-				wg.Done()
-			}()
-
-			select {
-			case <-stopCh:
-				return
-			default:
+			for task := range taskCh {
+				if isErrorLimitExceeded(&errCnt, int32(m)) {
+					return
+				}
+				if err := task(); err != nil {
+					atomic.AddInt32(&errCnt, 1)
+				}
 			}
-
-			if atomic.LoadInt32(&errCnt) >= int32(m) {
-				stopCh <- struct{}{}
-				return
-			}
-
-			if err := fn(); err != nil {
-				atomic.AddInt32(&errCnt, 1)
-			}
-		}(tasks[i])
+		}()
 	}
 
-	close(limitCh)
+	// Send tasks to the workers.
+	for i := 0; i < len(tasks); i++ {
+		if isErrorLimitExceeded(&errCnt, int32(m)) {
+			break
+		}
+		taskCh <- tasks[i]
+	}
+
+	close(taskCh)
 	wg.Wait()
 
 	if errCnt < int32(m) {
 		return nil
 	}
 	return ErrErrorsLimitExceeded
+}
+
+// isErrorLimitExceeded checks if the current error count exceeds the limit.
+func isErrorLimitExceeded(current *int32, limit int32) bool {
+	return atomic.LoadInt32(current) >= limit
 }

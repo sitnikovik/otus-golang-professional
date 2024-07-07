@@ -8,8 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestRun(t *testing.T) {

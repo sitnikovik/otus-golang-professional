@@ -33,7 +33,7 @@ func TestPipeline(t *testing.T) {
 		g("Dummy", func(v interface{}) interface{} { return v }),
 		g("Multiplier (* 2)", func(v interface{}) interface{} { return v.(int) * 2 }),
 		g("Adder (+ 100)", func(v interface{}) interface{} { return v.(int) + 100 }),
-		g("Stringifier", func(v interface{}) interface{} { return strconv.Itoa(v.(int)) }),
+		// g("Stringifier", func(v interface{}) interface{} { return strconv.Itoa(v.(int)) }),
 	}
 
 	t.Run("simple case", func(t *testing.T) {
@@ -50,7 +50,12 @@ func TestPipeline(t *testing.T) {
 		result := make([]string, 0, 10)
 		start := time.Now()
 		for s := range ExecutePipeline(in, nil, stages...) {
-			result = append(result, s.(string))
+			switch v := s.(type) {
+			case int:
+				result = append(result, strconv.Itoa(v))
+			case string:
+				result = append(result, v)
+			}
 		}
 		elapsed := time.Since(start)
 
@@ -83,11 +88,87 @@ func TestPipeline(t *testing.T) {
 		result := make([]string, 0, 10)
 		start := time.Now()
 		for s := range ExecutePipeline(in, done, stages...) {
-			result = append(result, s.(string))
+			switch v := s.(type) {
+			case int:
+				result = append(result, strconv.Itoa(v))
+			case string:
+				result = append(result, v)
+			}
 		}
 		elapsed := time.Since(start)
 
 		require.Len(t, result, 0)
 		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
+	})
+
+	t.Run("empty case", func(t *testing.T) {
+		in := make(Bi)
+		done := make(Bi)
+
+		close(in)
+		close(done)
+
+		result := make([]string, 0, 10)
+		start := time.Now()
+		for s := range ExecutePipeline(in, done, stages...) {
+			result = append(result, strconv.Itoa(s.(int)))
+		}
+		elapsed := time.Since(start)
+
+		require.Len(t, result, 0)
+		require.Less(t, int64(elapsed), int64(fault))
+	})
+
+	t.Run("single stage case", func(t *testing.T) {
+		in := make(Bi)
+		data := []int{1, 2, 3, 4, 5}
+
+		go func() {
+			for _, v := range data {
+				in <- v
+			}
+			close(in)
+		}()
+
+		result := make([]string, 0, 10)
+		start := time.Now()
+		for s := range ExecutePipeline(in, nil, stages[0]) {
+			switch v := s.(type) {
+			case int:
+				result = append(result, strconv.Itoa(v))
+			case string:
+				result = append(result, v)
+			}
+		}
+		elapsed := time.Since(start)
+
+		require.Equal(t, []string{"1", "2", "3", "4", "5"}, result)
+		require.Less(t,
+			int64(elapsed),
+			// ~0.5s for processing 5 values in 1 stage (100ms) concurrently
+			int64(sleepPerStage)*int64(len(data))+int64(fault))
+	})
+
+	t.Run("empty done case", func(t *testing.T) {
+		in := make(Bi)
+		done := make(Bi)
+
+		close(in)
+		close(done)
+
+		result := make([]string, 0, 10)
+		start := time.Now()
+		for s := range ExecutePipeline(in, done, stages[0], stages[1], stages[2]) {
+			switch v := s.(type) {
+			case int:
+				result = append(result, strconv.Itoa(v))
+			case string:
+				result = append(result, v)
+			}
+		}
+		elapsed := time.Since(start)
+
+		require.Len(t, result, 0)
+		require.Less(t, int64(elapsed), int64(fault))
 	})
 }

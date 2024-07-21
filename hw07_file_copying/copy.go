@@ -59,7 +59,7 @@ func runCopy(fromFile *os.File, toFile *os.File, offset, limit int64) error {
 	barReader := bar.NewProxyReader(fromFile)
 
 	if _, err := io.CopyN(toFile, barReader, limit); err != nil {
-		if err != io.EOF {
+		if !errors.Is(err, io.EOF) {
 			return err
 		}
 	}

@@ -38,7 +38,7 @@ func removeFIleOnExists(path string) {
 }
 
 func (s *tSuite) TestCopy() {
-	s.T().Run(s.name, func(t *testing.T) {
+	s.T().Run(s.name, func(_ *testing.T) {
 		err := Copy(s.from, s.to, s.offset, s.limit)
 		if s.err != nil {
 			s.Require().NoFileExists(s.to)

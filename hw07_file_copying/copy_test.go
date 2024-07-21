@@ -41,6 +41,7 @@ func (s *tSuite) TestCopy() {
 	s.T().Run(s.name, func(t *testing.T) {
 		err := Copy(s.from, s.to, s.offset, s.limit)
 		if s.err != nil {
+			s.Require().NoFileExists(s.to)
 			s.Require().ErrorIs(err, s.err)
 			return
 		}
@@ -96,8 +97,14 @@ func TestTSuite(t *testing.T) {
 		},
 		{
 			name: "err unsported file on dir",
-			from: "/dir",
-			to:   "/tmp/213213123",
+			from: "testdata/dir",
+			to:   "testdata/dir_copy",
+			err:  ErrUnsupportedFile,
+		},
+		{
+			name: "err on empty file",
+			from: "testdata/empty.txt",
+			to:   "testdata/empty_copy.txt",
 			err:  ErrUnsupportedFile,
 		},
 		{

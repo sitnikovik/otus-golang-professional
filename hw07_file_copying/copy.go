@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"io"
 	"os"
 
@@ -19,45 +18,32 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return ErrOffsetExceedsFileSize
 	}
 
-	// Make files to work with
-	fromFile, toFile, err := makeFiles(fromPath, toPath)
+	// Open the file to copy
+	fromFile, err := os.Open(fromPath)
 	if err != nil {
 		return err
 	}
-	defer func() {
-		fromFile.Close()
-		toFile.Close()
-	}()
+	defer fromFile.Close()
 
-	// Validate file to copy
+	// Validate
 	stat, err := fromFile.Stat()
 	if err != nil || stat.IsDir() || stat.Size() == 0 {
 		return ErrUnsupportedFile
 	}
-
 	if offset > stat.Size() {
 		return ErrOffsetExceedsFileSize
 	}
 
 	// Start copying
+	toFile, err := os.Create(toPath)
+	if err != nil {
+		return err
+	}
+	defer toFile.Close()
 	if limit == 0 || limit > stat.Size() {
 		limit = stat.Size()
 	}
 	return runCopy(fromFile, toFile, offset, limit)
-}
-
-func makeFiles(fromPath, toPath string) (*os.File, *os.File, error) {
-	fromFile, err := os.Open(fromPath)
-	if err != nil {
-		return nil, nil, ErrUnsupportedFile
-	}
-
-	toFile, err := os.Create(toPath)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return fromFile, toFile, nil
 }
 
 func runCopy(fromFile *os.File, toFile *os.File, offset, limit int64) error {
@@ -66,7 +52,6 @@ func runCopy(fromFile *os.File, toFile *os.File, offset, limit int64) error {
 	}
 
 	// start new bar
-	fmt.Printf("o: %d, l: %d\n", offset, limit)
 	bar := pb.Full.Start64(limit)
 	defer bar.Finish()
 
@@ -74,10 +59,9 @@ func runCopy(fromFile *os.File, toFile *os.File, offset, limit int64) error {
 	barReader := bar.NewProxyReader(fromFile)
 
 	if _, err := io.CopyN(toFile, barReader, limit); err != nil {
-		if err == io.EOF {
-			return nil
+		if err != io.EOF {
+			return err
 		}
-		return err
 	}
 
 	return nil

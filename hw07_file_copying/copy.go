@@ -16,17 +16,17 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return ErrOffsetExceedsFileSize
 	}
 
-	fromFile, err := os.Open(fromPath)
+	// Make files to work with
+	fromFile, toFile, err := makeFiles(fromPath, toPath)
 	if err != nil {
 		return err
 	}
-	defer fromFile.Close()
+	defer func() {
+		fromFile.Close()
+		toFile.Close()
+	}()
 
-	toFile, err := os.Create(toPath)
-	if err != nil {
-		return err
-	}
-
+	// Validate file to copy
 	stat, err := fromFile.Stat()
 	if err != nil {
 		return err
@@ -34,19 +34,17 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	if stat.IsDir() {
 		return ErrUnsupportedFile
 	}
-
 	if offset > stat.Size() {
 		return ErrOffsetExceedsFileSize
 	}
 
-	if limit == 0 {
-		limit = stat.Size() - offset
-	}
-
+	// Start copying
 	if _, err := fromFile.Seek(offset, 0); err != nil {
 		return err
 	}
-
+	if limit == 0 {
+		limit = stat.Size()
+	}
 	if _, err := io.CopyN(toFile, fromFile, limit); err != nil {
 		if err == io.EOF {
 			return nil
@@ -54,9 +52,19 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return err
 	}
 
-	if err := toFile.Close(); err != nil {
-		return err
+	return nil
+}
+
+func makeFiles(fromPath, toPath string) (*os.File, *os.File, error) {
+	fromFile, err := os.Open(fromPath)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	return nil
+	toFile, err := os.Create(toPath)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return fromFile, toFile, nil
 }

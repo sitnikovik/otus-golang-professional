@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"os"
 
@@ -30,18 +31,16 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	// Validate file to copy
 	stat, err := fromFile.Stat()
-	if err != nil {
-		return err
-	}
-	if stat.IsDir() {
+	if err != nil || stat.IsDir() || stat.Size() == 0 {
 		return ErrUnsupportedFile
 	}
+
 	if offset > stat.Size() {
 		return ErrOffsetExceedsFileSize
 	}
 
 	// Start copying
-	if limit == 0 {
+	if limit == 0 || limit > stat.Size() {
 		limit = stat.Size()
 	}
 	return runCopy(fromFile, toFile, offset, limit)
@@ -50,7 +49,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 func makeFiles(fromPath, toPath string) (*os.File, *os.File, error) {
 	fromFile, err := os.Open(fromPath)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, ErrUnsupportedFile
 	}
 
 	toFile, err := os.Create(toPath)
@@ -67,6 +66,7 @@ func runCopy(fromFile *os.File, toFile *os.File, offset, limit int64) error {
 	}
 
 	// start new bar
+	fmt.Printf("o: %d, l: %d\n", offset, limit)
 	bar := pb.Full.Start64(limit)
 	defer bar.Finish()
 

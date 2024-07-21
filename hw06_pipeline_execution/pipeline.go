@@ -11,10 +11,6 @@ type Stage func(in In) (out Out)
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	outCh := make(Bi)
 
-	for _, stage := range stages {
-		in = stage(in)
-	}
-
 	go func() {
 		defer close(outCh)
 
@@ -32,6 +28,10 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 			}
 		}
 	}()
+
+	for _, stage := range stages {
+		in = stage(in)
+	}
 
 	return outCh
 }

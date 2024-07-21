@@ -4,6 +4,8 @@ import (
 	"errors"
 	"io"
 	"os"
+
+	"github.com/cheggaaa/pb/v3"
 )
 
 var (
@@ -39,20 +41,10 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 
 	// Start copying
-	if _, err := fromFile.Seek(offset, 0); err != nil {
-		return err
-	}
 	if limit == 0 {
 		limit = stat.Size()
 	}
-	if _, err := io.CopyN(toFile, fromFile, limit); err != nil {
-		if err == io.EOF {
-			return nil
-		}
-		return err
-	}
-
-	return nil
+	return runCopy(fromFile, toFile, offset, limit)
 }
 
 func makeFiles(fromPath, toPath string) (*os.File, *os.File, error) {
@@ -67,4 +59,26 @@ func makeFiles(fromPath, toPath string) (*os.File, *os.File, error) {
 	}
 
 	return fromFile, toFile, nil
+}
+
+func runCopy(fromFile *os.File, toFile *os.File, offset, limit int64) error {
+	if _, err := fromFile.Seek(offset, 0); err != nil {
+		return err
+	}
+
+	// start new bar
+	bar := pb.Full.Start64(limit)
+	defer bar.Finish()
+
+	// create proxy reader
+	barReader := bar.NewProxyReader(fromFile)
+
+	if _, err := io.CopyN(toFile, barReader, limit); err != nil {
+		if err == io.EOF {
+			return nil
+		}
+		return err
+	}
+
+	return nil
 }

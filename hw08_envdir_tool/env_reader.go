@@ -2,9 +2,17 @@ package main
 
 import (
 	"bytes"
-	"fmt"
+	"errors"
+	"io/fs"
 	"os"
 	"strings"
+)
+
+var (
+	// ErrNilDirEntry says that dir entry is nil
+	ErrNilDirEntry = errors.New("dirEntry is nil")
+	// ErrInvalidEnvName says that env name contains invalid characters
+	ErrInvalidEnvName = errors.New("invalid env name")
 )
 
 type Environment map[string]EnvValue
@@ -24,42 +32,69 @@ func ReadDir(dir string) (Environment, error) {
 	}
 
 	env := make(Environment)
-	for _, file := range scandir {
-		if file.IsDir() {
-			continue
+	for _, dirEntry := range scandir {
+		err := validateDirEntry(dirEntry)
+		if err != nil {
+			return nil, err
 		}
 
-		envName := file.Name()
-		if strings.Contains(envName, "=") {
-			return nil, fmt.Errorf("env name '%s' contains '='", envName)
-		}
+		envName := dirEntry.Name()
 
 		bb, err := os.ReadFile(dir + "/" + envName)
 		if err != nil {
 			return nil, err
 		}
 
-		// терминальные нули (0x00) заменяются на перевод строки (\n)
-		isToShiftString := !bytes.Contains(bb, []byte{0x00})
-		bb = bytes.ReplaceAll(bb, []byte{0x00}, []byte{'\n'})
-
-		s := string(bb)
-		if isToShiftString {
-			for i := 0; i < len(s); i++ {
-				if s[i] == '\n' {
-					s = s[:i]
-					break
-				}
-			}
-		}
-		s = strings.Trim(strings.TrimRight(s, " "), "\t")
-
-		_, ok := os.LookupEnv(envName)
 		env[envName] = EnvValue{
-			Value:      s,
-			NeedRemove: ok,
+			Value:      prepareEnvValue(bb),
+			NeedRemove: needRemoveEnv(envName),
 		}
 	}
 
 	return env, nil
+}
+
+// validateDirEntry checks if dirEntry could be used as env variable
+func validateDirEntry(dirEntry fs.DirEntry) error {
+	if dirEntry == nil {
+		return ErrNilDirEntry
+	}
+	if dirEntry.IsDir() {
+		return nil
+	}
+
+	envName := dirEntry.Name()
+	if strings.Contains(envName, "=") {
+		return ErrInvalidEnvName
+	}
+
+	return nil
+}
+
+// prepareEnvValue prepares env value from file content
+func prepareEnvValue(bb []byte) string {
+	isToShiftString := !bytes.Contains(bb, []byte{0x00})
+	bb = bytes.ReplaceAll(bb, []byte{0x00}, []byte{'\n'})
+
+	s := string(bb)
+	if isToShiftString {
+		// shift string to the first '\n'
+		for i := 0; i < len(s); i++ {
+			if s[i] == '\n' {
+				// there is no need to shift with strings.Split()
+				s = s[:i]
+				break
+			}
+		}
+	}
+	s = strings.TrimRight(s, " ")
+	s = strings.Trim(s, "\t")
+
+	return s
+}
+
+// needRemoveEnv checks if env variable is already set
+func needRemoveEnv(envName string) bool {
+	_, ok := os.LookupEnv(envName)
+	return ok
 }

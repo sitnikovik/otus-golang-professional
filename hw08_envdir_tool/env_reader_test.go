@@ -8,7 +8,6 @@ import (
 )
 
 func TestReadDir(t *testing.T) {
-
 	type args struct {
 		path string
 	}

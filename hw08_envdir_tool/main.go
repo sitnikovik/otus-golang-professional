@@ -9,14 +9,11 @@ const (
 	minNArgs = 2
 )
 
-var (
-	ErrorWrongNArgs = "wrong number of arguments, expected at least %d"
-)
+var ErrorWrongNArgs = "wrong number of arguments, expected at least %d"
 
 func main() {
 	if len(os.Args)-1 < minNArgs {
 		log.Fatalf(ErrorWrongNArgs, minNArgs)
-		os.Exit(1)
 	}
 
 	env, err := ReadDir(os.Args[1])

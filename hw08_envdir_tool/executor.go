@@ -7,16 +7,14 @@ import (
 )
 
 const (
-	// OkCode is a return code for success
+	// OkCode is a return code for success.
 	OkCode = 0
-	// ErrCode is a return code for errors
+	// ErrCode is a return code for errors.
 	ErrCode = 1
 )
 
-var (
-	// ErrNilEnvironment says that environment is nil
-	ErrNilEnvironment = errors.New("environment is nil")
-)
+// ErrNilEnvironment says that environment is nil.
+var ErrNilEnvironment = errors.New("environment is nil")
 
 // RunCmd runs a command + arguments (cmd) with environment variables from env.
 func RunCmd(cmd []string, env Environment) (returnCode int) {
@@ -53,7 +51,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	return
 }
 
-// logError writes error to stderr
+// logError writes error to stderr.
 func logError(err error) {
 	if err == nil {
 		return
@@ -62,7 +60,7 @@ func logError(err error) {
 	os.Stderr.WriteString(err.Error())
 }
 
-// setEnvironment sets environment variables from env
+// setEnvironment sets environment variables from env.
 func setEnvironment(env Environment) (err error) {
 	for k, v := range env {
 		if v.NeedRemove && os.Unsetenv(k) != nil {
@@ -76,7 +74,7 @@ func setEnvironment(env Environment) (err error) {
 	return
 }
 
-// run runs a command with arguments
+// run runs a command with arguments.
 func run(cmd string, args []string) error {
 	command := exec.Command(cmd, args...)
 	command.Stdout = os.Stdout

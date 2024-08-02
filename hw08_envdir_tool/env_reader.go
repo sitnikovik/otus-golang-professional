@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	// ErrNilDirEntry says that dir entry is nil
+	// ErrNilDirEntry says that dir entry is nil.
 	ErrNilDirEntry = errors.New("dirEntry is nil")
-	// ErrInvalidEnvName says that env name contains invalid characters
+	// ErrInvalidEnvName says that env name contains invalid characters.
 	ErrInvalidEnvName = errors.New("invalid env name")
 )
 
@@ -54,7 +54,7 @@ func ReadDir(dir string) (Environment, error) {
 	return env, nil
 }
 
-// validateDirEntry checks if dirEntry could be used as env variable
+// validateDirEntry checks if dirEntry could be used as env variable.
 func validateDirEntry(dirEntry fs.DirEntry) error {
 	if dirEntry == nil {
 		return ErrNilDirEntry
@@ -71,7 +71,7 @@ func validateDirEntry(dirEntry fs.DirEntry) error {
 	return nil
 }
 
-// prepareEnvValue prepares env value from file content
+// prepareEnvValue prepares env value from file content.
 func prepareEnvValue(bb []byte) string {
 	isToShiftString := !bytes.Contains(bb, []byte{0x00})
 	bb = bytes.ReplaceAll(bb, []byte{0x00}, []byte{'\n'})
@@ -93,7 +93,7 @@ func prepareEnvValue(bb []byte) string {
 	return s
 }
 
-// needRemoveEnv checks if env variable is already set
+// needRemoveEnv checks if env variable is already set.
 func needRemoveEnv(envName string) bool {
 	_, ok := os.LookupEnv(envName)
 	return ok

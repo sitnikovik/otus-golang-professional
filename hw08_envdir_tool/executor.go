@@ -53,6 +53,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	return
 }
 
+// logError writes error to stderr
 func logError(err error) {
 	if err == nil {
 		return
@@ -61,6 +62,7 @@ func logError(err error) {
 	os.Stderr.WriteString(err.Error())
 }
 
+// setEnvironment sets environment variables from env
 func setEnvironment(env Environment) (err error) {
 	for k, v := range env {
 		if v.NeedRemove && os.Unsetenv(k) != nil {
@@ -74,6 +76,7 @@ func setEnvironment(env Environment) (err error) {
 	return
 }
 
+// run runs a command with arguments
 func run(cmd string, args []string) error {
 	command := exec.Command(cmd, args...)
 	command.Stdout = os.Stdout

@@ -31,7 +31,8 @@ func ReadDir(dir string) (Environment, error) {
 		return nil, err
 	}
 
-	env := make(Environment)
+	env := parseCurrentEnvironment()
+
 	for _, dirEntry := range dirEntries {
 		err := validateDirEntry(dirEntry)
 		if err != nil {
@@ -52,6 +53,18 @@ func ReadDir(dir string) (Environment, error) {
 	}
 
 	return env, nil
+}
+
+func parseCurrentEnvironment() Environment {
+	env := make(Environment)
+	for _, envLine := range os.Environ() {
+		pair := strings.SplitN(envLine, "=", 2)
+		env[pair[0]] = EnvValue{
+			Value: pair[1],
+		}
+	}
+
+	return env
 }
 
 // validateDirEntry checks if dirEntry could be used as env variable.

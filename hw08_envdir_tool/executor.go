@@ -77,6 +77,7 @@ func setEnvironment(env Environment) (err error) {
 // run runs a command with arguments.
 func run(cmd string, args []string) error {
 	command := exec.Command(cmd, args...)
+	command.Stdin = os.Stdin
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
 

@@ -23,6 +23,12 @@ type EnvValue struct {
 	NeedRemove bool
 }
 
+// Exists checks if the env variable already exists
+func (e Environment) Exists(envName string) bool {
+	_, ok := e[envName]
+	return ok
+}
+
 // ReadDir reads a specified directory and returns map of env variables.
 // Variables represented as files where filename is name of variable, file first line is a value.
 func ReadDir(dir string) (Environment, error) {
@@ -48,7 +54,7 @@ func ReadDir(dir string) (Environment, error) {
 
 		env[envName] = EnvValue{
 			Value:      prepareEnvValue(bb),
-			NeedRemove: needRemoveEnv(envName),
+			NeedRemove: env.Exists(envName),
 		}
 	}
 
@@ -104,10 +110,4 @@ func prepareEnvValue(bb []byte) string {
 	s = strings.Trim(s, "\t")
 
 	return s
-}
-
-// needRemoveEnv checks if env variable is already set.
-func needRemoveEnv(envName string) bool {
-	_, ok := os.LookupEnv(envName)
-	return ok
 }

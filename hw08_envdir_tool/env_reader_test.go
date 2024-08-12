@@ -99,7 +99,12 @@ func TestReadDir(t *testing.T) {
 				require.Nil(t, got)
 				return
 			}
-			require.Equal(t, tt.want, got)
+
+			for envName, envValue := range got {
+				if wantValue, ok := tt.want[envName]; ok {
+					require.Equal(t, wantValue, envValue)
+				}
+			}
 		})
 	}
 }

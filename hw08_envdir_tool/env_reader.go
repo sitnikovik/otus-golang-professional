@@ -23,7 +23,7 @@ type EnvValue struct {
 	NeedRemove bool
 }
 
-// Exists checks if the env variable already exists
+// Exists checks if the env variable already exists.
 func (e Environment) Exists(envName string) bool {
 	_, ok := e[envName]
 	return ok

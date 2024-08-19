@@ -1,0 +1,17 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/fixme_my_friend/hw10_program_optimization
+                                │ old_bench.out │
+                                │    sec/op     │
+GetDomainStat/find_'com'-10         91.95m ± 1%
+GetDomainStat/find_'gov'-10         91.97m ± 1%
+GetDomainStat/find_'unknown'-10     123.6m ± 1%
+geomean                             101.5m
+
+pkg: github.com/sitnikovik/otus-golang-professional/hw10_program_optimization
+                                │ new_bench.out │
+                                │    sec/op     │
+GetDomainStat/find_'com'-10         11.68µ ± 3%
+GetDomainStat/find_'gov'-10         11.69µ ± 3%
+GetDomainStat/find_'unknown'-10     11.14µ ± 2%
+geomean                             11.50µ

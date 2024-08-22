@@ -54,8 +54,6 @@ func TestValidate(t *testing.T) {
 			},
 			expectedErr: ValidationErrors{},
 		},
-		// ...
-		// Place your code here.
 	}
 
 	for i, tt := range tests {

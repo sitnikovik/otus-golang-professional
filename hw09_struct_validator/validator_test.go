@@ -47,12 +47,12 @@ func TestValidate(t *testing.T) {
 		{
 			name: "valid user",
 			in: User{
-				ID:    "123456789012345678901234567890123456", // 36 characters
+				ID:    "123456789012345678901234567890123456",
 				Email: "test@test.ru",
 				Age:   50,
 				Role:  "admin",
 			},
-			expectedErr: ValidationErrors{},
+			expectedErr: nil,
 		},
 	}
 

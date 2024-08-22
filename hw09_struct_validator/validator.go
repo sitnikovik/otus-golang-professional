@@ -57,7 +57,10 @@ func Validate(v interface{}) error {
 		}
 	}
 
-	return errors
+	if len(errors) > 0 {
+		return errors
+	}
+	return nil
 }
 
 func validateString(value string, rules []stringValidRule) error {

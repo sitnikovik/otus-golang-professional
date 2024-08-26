@@ -23,49 +23,41 @@ func (v ValidationErrors) Error() string {
 }
 
 func Validate(v interface{}) error {
-	errors := ValidationErrors{}
+	errs := make(ValidationErrors, 0)
 
 	val := reflect.ValueOf(v)
 	if val.Kind() == reflect.Ptr {
 		val = val.Elem()
 	}
 
-	reftype := reflect.TypeOf(v)
+	typ := val.Type()
 	for i := 0; i < val.NumField(); i++ {
-		field := reftype.Field(i)
+		field := val.Field(i)
+		fieldType := typ.Field(i)
+		tag := fieldType.Tag.Get("validate")
 
-		validTag := val.Type().Field(i).Tag.Get("validate")
-		if validTag == "" {
+		if tag == "" {
 			continue
 		}
 
-		fieldName := field.Name
-		fieldValue := val.Field(i)
-		switch field.Type.Kind() {
-		case reflect.String:
-			rules := parseStringValidRules(validTag)
-			s := fieldValue.String()
-			if err := validateString(s, rules); err != nil {
-				errors = append(errors, ValidationError{Field: fieldName, Err: err})
-			}
-		case reflect.Int:
-			rules := parseIntValidRules(validTag)
-			num := int(fieldValue.Int())
-			if err := validateInt(num, rules); err != nil {
-				errors = append(errors, ValidationError{Field: fieldName, Err: err})
-			}
+		if err := validateField(field, tag); err != nil {
+			errs = append(errs, ValidationError{
+				Field: fieldType.Name,
+				Err:   err,
+			})
 		}
 	}
 
-	if len(errors) > 0 {
-		return errors
+	if len(errs) == 0 {
+		return nil
 	}
-	return nil
+	return errs
 }
 
-func validateString(value string, rules []stringValidRule) error {
-	for _, r := range rules {
-		if err := r.Validate(value); err != nil {
+func validateField(field reflect.Value, tag string) error {
+	conditions := strings.Split(tag, "|")
+	for _, condition := range conditions {
+		if err := checkCondition(field, condition); err != nil {
 			return err
 		}
 	}
@@ -73,10 +65,22 @@ func validateString(value string, rules []stringValidRule) error {
 	return nil
 }
 
-func validateInt(value int, rules []intValidRule) error {
-	for _, r := range rules {
-		if err := r.Validate(value); err != nil {
-			return err
+func checkCondition(field reflect.Value, condition string) error {
+	switch field.Kind() {
+	case reflect.String:
+		return validateString(field.String(), condition)
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return validateNumber(field.Int(), condition)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return validateNumber(int64(field.Uint()), condition)
+	case reflect.Float32, reflect.Float64:
+		return validateNumber(field.Float(), condition)
+	case reflect.Slice:
+		for i := 0; i < field.Len(); i++ {
+			elem := field.Index(i)
+			if err := checkCondition(elem, condition); err != nil {
+				return fmt.Errorf("elem %d: %v", i, err)
+			}
 		}
 	}
 

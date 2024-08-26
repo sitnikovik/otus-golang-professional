@@ -1,7 +1,6 @@
 package hw09structvalidator
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -14,59 +13,57 @@ type stringValidRule struct {
 	In     []string
 }
 
-// parseStringValidRules creates list of rules to check the string struct field by its tag.
-func parseStringValidRules(tag string) []stringValidRule {
-	rules := []stringValidRule{}
+func validateString(value string, condition string) error {
+	rule := parseStringCondition(condition)
 
-	for _, condition := range strings.Split(tag, "|") {
-		for _, pattern := range strings.Fields(condition) {
-			if pattern == "" {
-				continue
-			}
-
-			parts := strings.SplitN(pattern, ":", 2)
-			key, value := parts[0], parts[1]
-			if value == "" {
-				continue
-			}
-
-			rule := stringValidRule{}
-			switch key {
-			case "len":
-				len, _ := strconv.Atoi(value)
-				rule.Len = len
-			case "regexp":
-				rule.Regexp = value
-			case "in":
-				rule.In = strings.Split(value, ",")
-			}
-			rules = append(rules, rule)
-		}
+	if rule.Len > 0 && len(value) != rule.Len {
+		return ErrInvalidLength
 	}
-
-	return rules
-}
-
-// Validate validates the string for satisfying the rule
-func (r stringValidRule) Validate(s string) error {
-	if r.Len > 0 && len(s) != r.Len {
-		return fmt.Errorf("string length must be %d", r.Len)
+	if rule.Regexp != "" && !regexp.MustCompile(rule.Regexp).MatchString(value) {
+		return ErrNotMatchRegexp
 	}
-	if r.Regexp != "" && !regexp.MustCompile(r.Regexp).MatchString(s) {
-		return fmt.Errorf("string must match the pattern %s", r.Regexp)
-	}
-	if len(r.In) > 0 {
+	if len(rule.In) > 0 {
 		found := false
-		for _, v := range r.In {
-			if v == s {
+		for _, v := range rule.In {
+			if v == value {
 				found = true
 				break
 			}
 		}
 		if !found {
-			return fmt.Errorf("string must be one of %v", r.In)
+			return ErrNotInRange
 		}
 	}
 
 	return nil
+}
+
+func parseStringCondition(condition string) (rule stringValidRule) {
+	if condition == "" {
+		return rule
+	}
+
+	for _, pattern := range strings.Fields(condition) {
+		if pattern == "" {
+			continue
+		}
+
+		parts := strings.SplitN(pattern, ":", 2)
+		key, value := parts[0], parts[1]
+		if value == "" {
+			continue
+		}
+
+		switch key {
+		case "len":
+			len, _ := strconv.Atoi(value)
+			rule.Len = len
+		case "regexp":
+			rule.Regexp = value
+		case "in":
+			rule.In = strings.Split(value, ",")
+		}
+	}
+
+	return rule
 }

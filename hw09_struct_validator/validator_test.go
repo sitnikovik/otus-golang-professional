@@ -51,6 +51,9 @@ func TestValidate(t *testing.T) {
 				Email: "test@test.ru",
 				Age:   50,
 				Role:  "admin",
+				Phones: []string{
+					"12312312312",
+				},
 			},
 			expectedErr: nil,
 		},

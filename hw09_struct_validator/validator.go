@@ -52,7 +52,7 @@ func validateField(field reflect.Value, tag string) error {
 
 // checkCondition checks if the field satisfies the condition.
 func checkCondition(field reflect.Value, condition string) error {
-	switch field.Kind() {
+	switch field.Kind() { //nolint:exhaustive // don't need to check all types.
 	case reflect.String:
 		return validateString(field.String(), condition)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:

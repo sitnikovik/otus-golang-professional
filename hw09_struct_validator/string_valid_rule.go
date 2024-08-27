@@ -58,8 +58,8 @@ func parseStringCondition(condition string) (rule stringValidRule) {
 
 		switch key {
 		case "len":
-			len, _ := strconv.Atoi(value)
-			rule.Len = len
+			l, _ := strconv.Atoi(value)
+			rule.Len = l
 		case "regexp":
 			rule.Regexp = value
 		case "in":

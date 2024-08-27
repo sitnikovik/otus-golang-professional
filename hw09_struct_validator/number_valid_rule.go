@@ -9,9 +9,10 @@ import (
 type intValidRule struct {
 	Min int
 	Max int
-	In  [2]int
+	In  []int
 }
 
+// validateNumber checks if the value satisfies the conditions.
 func validateNumber[T int64 | float64](value T, condition string) error {
 	rule := parseNumberCondition(condition)
 
@@ -21,13 +22,23 @@ func validateNumber[T int64 | float64](value T, condition string) error {
 	if rule.Max > 0 && value > T(rule.Max) {
 		return ErrNotLesser
 	}
-	if rule.In[0] > 0 && rule.In[1] > 0 && (value < T(rule.In[0]) || value > T(rule.In[1])) {
-		return ErrNotInRange
+	if len(rule.In) > 0 {
+		found := false
+		for _, v := range rule.In {
+			if v == int(value) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return ErrNotInRange
+		}
 	}
 
 	return nil
 }
 
+// parseNumberCondition parses the condition string and returns the rule to check the field value.
 func parseNumberCondition(condition string) (rule intValidRule) {
 	if condition == "" {
 		return rule
@@ -52,13 +63,12 @@ func parseNumberCondition(condition string) (rule intValidRule) {
 			max, _ := strconv.Atoi(value)
 			rule.Max = max
 		case "in":
-			in := strings.Split(value, ",")
-			if len(in) != 2 {
-				continue
+			for _, v := range strings.Split(value, ",") {
+				x, err := strconv.Atoi(v)
+				if err == nil {
+					rule.In = append(rule.In, x)
+				}
 			}
-			min, _ := strconv.Atoi(in[0])
-			max, _ := strconv.Atoi(in[1])
-			rule.In = [2]int{min, max}
 		}
 	}
 

@@ -75,9 +75,9 @@ func checkCondition(field reflect.Value, condition string) error {
 	case reflect.String:
 		return validateString(field.String(), condition)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return validateNumber(field.Int(), condition)
+		return validateNumber(int(field.Int()), condition)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return validateNumber(int64(field.Uint()), condition)
+		return validateNumber(uint(field.Uint()), condition)
 	case reflect.Float32, reflect.Float64:
 		return validateNumber(field.Float(), condition)
 	case reflect.Slice:

@@ -7,13 +7,13 @@ import (
 
 // intValidRule describes what the conditions target int field must satisfying to.
 type intValidRule struct {
-	Min int
-	Max int
-	In  []int
+	Min int   // The minimum value that the field must be greater than.
+	Max int   // The maximum value that the field must be lesser than.
+	In  []int // The list of values that the field must be equal to.
 }
 
 // validateNumber checks if the value satisfies the conditions.
-func validateNumber[T int64 | float64](value T, condition string) error {
+func validateNumber[T int | uint | float32 | float64](value T, condition string) error {
 	rule := parseNumberCondition(condition)
 
 	if rule.Min > 0 && value < T(rule.Min) {

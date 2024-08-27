@@ -8,11 +8,12 @@ import (
 
 // stringValidRule describes what the conditions target string field must satisfying to.
 type stringValidRule struct {
-	Len    int
-	Regexp string
-	In     []string
+	Len    int      // The length that the field must be equal to.
+	Regexp string   // The regular expression that the field must match.
+	In     []string // The list of values that the field must be equal to.
 }
 
+// validateString checks if the value satisfies the conditions.
 func validateString(value string, condition string) error {
 	rule := parseStringCondition(condition)
 
@@ -38,6 +39,7 @@ func validateString(value string, condition string) error {
 	return nil
 }
 
+// parseStringCondition parses the condition string and returns the rule to check the field value.
 func parseStringCondition(condition string) (rule stringValidRule) {
 	if condition == "" {
 		return rule

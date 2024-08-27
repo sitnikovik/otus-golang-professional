@@ -6,25 +6,6 @@ import (
 	"strings"
 )
 
-// ValidationError describes a validation error.
-type ValidationError struct {
-	Field string
-	Err   error
-}
-
-// ValidationErrors is a list of validation errors.
-type ValidationErrors []ValidationError
-
-// Error returns the error message.
-func (v ValidationErrors) Error() string {
-	sb := strings.Builder{}
-	for _, err := range v {
-		sb.WriteString(fmt.Sprintf("field: %s, error: %v\n", err.Field, err.Err))
-	}
-
-	return sb.String()
-}
-
 // Validate validates the struct fields according to its tags.
 func Validate(v interface{}) error {
 	errs := make(ValidationErrors, 0)
@@ -84,7 +65,7 @@ func checkCondition(field reflect.Value, condition string) error {
 		for i := 0; i < field.Len(); i++ {
 			elem := field.Index(i)
 			if err := checkCondition(elem, condition); err != nil {
-				return fmt.Errorf("elem %d: %v", i, err)
+				return fmt.Errorf("elem %d: %w", i, err)
 			}
 		}
 	}

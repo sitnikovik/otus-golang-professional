@@ -74,7 +74,7 @@ func TestValidate(t *testing.T) {
 				{Field: "Age", Err: ErrNotGreater},
 				{Field: "Email", Err: ErrNotMatchRegexp},
 				{Field: "Role", Err: ErrNotInRange},
-				{Field: "Phones", Err: fmt.Errorf("elem 1: %v", ErrInvalidLength)},
+				{Field: "Phones", Err: fmt.Errorf("elem 1: %w", ErrInvalidLength)},
 			},
 		},
 		{

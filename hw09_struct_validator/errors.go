@@ -2,6 +2,8 @@ package hw09structvalidator
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 )
 
 var (
@@ -16,3 +18,22 @@ var (
 	// ErrNotLesser is an error that is returned when the value is not lesser than the specified value.
 	ErrNotLesser = errors.New("not lesser")
 )
+
+// ValidationError describes a validation error.
+type ValidationError struct {
+	Field string
+	Err   error
+}
+
+// ValidationErrors is a list of validation errors.
+type ValidationErrors []ValidationError
+
+// Error returns the error message.
+func (v ValidationErrors) Error() string {
+	ss := make([]string, 0, len(v))
+	for _, e := range v {
+		ss = append(ss, fmt.Sprintf("%s: %s", e.Field, e.Err.Error()))
+	}
+
+	return strings.Join(ss, ", ")
+}

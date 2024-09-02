@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
@@ -38,23 +40,94 @@ type (
 
 func TestValidate(t *testing.T) {
 	tests := []struct {
+		name        string
 		in          interface{}
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			name: "valid user",
+			in: User{
+				ID:    "123456789012345678901234567890123456",
+				Email: "test@test.ru",
+				Age:   50,
+				Role:  "admin",
+				Phones: []string{
+					"12312312312",
+				},
+			},
+			expectedErr: nil,
 		},
-		// ...
-		// Place your code here.
+		{
+			name: "invalid user",
+			in: User{
+				ID:    "123456789012345678901",
+				Email: "@test.ru",
+				Age:   17,
+				Role:  "user",
+				Phones: []string{
+					"12312312312",
+					"12312",
+				},
+			},
+			expectedErr: ValidationErrors{
+				{Field: "ID", Err: ErrInvalidLength},
+				{Field: "Age", Err: ErrNotGreater},
+				{Field: "Email", Err: ErrNotMatchRegexp},
+				{Field: "Role", Err: ErrNotInRange},
+				{Field: "Phones", Err: fmt.Errorf("elem 1: %w", ErrInvalidLength)},
+			},
+		},
+		{
+			name: "valid app",
+			in: App{
+				Version: "1.0.0",
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "invalid app",
+			in: App{
+				Version: "1.0",
+			},
+			expectedErr: ValidationErrors{
+				{Field: "Version", Err: ErrInvalidLength},
+			},
+		},
+		{
+			name: "valid token",
+			in: Token{
+				Header:    []byte("header"),
+				Payload:   []byte("payload"),
+				Signature: []byte("signature"),
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "valid response",
+			in: Response{
+				Code: 200,
+				Body: "body",
+			},
+			expectedErr: nil,
+		},
+		{
+			name: "invalid response",
+			in: Response{
+				Code: 201,
+				Body: "body",
+			},
+			expectedErr: ValidationErrors{
+				{Field: "Code", Err: ErrNotInRange},
+			},
+		},
 	}
 
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 			tt := tt
 			t.Parallel()
 
-			// Place your code here.
-			_ = tt
+			require.Equal(t, tt.expectedErr, Validate(tt.in))
 		})
 	}
 }

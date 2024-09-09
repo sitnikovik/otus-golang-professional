@@ -12,8 +12,15 @@ type TelnetClient interface {
 	Receive() error
 }
 
-func NewTelnetClient(address string, timeout time.Duration, in io.ReadCloser, out io.Writer) TelnetClient {
+func NewTelnetClient(
+	address string,
+	timeout time.Duration,
+	in io.ReadCloser,
+	out io.Writer,
+) TelnetClient {
 	// Place your code here.
+	// P.S. Author's solution takes no more than 50 lines.
+
 	return nil
 }
 

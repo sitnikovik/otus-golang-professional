@@ -60,7 +60,14 @@ func (c *telnetClient) Close() error {
 }
 
 func (c *telnetClient) Send() error {
-	panic("implement me")
+	bb := make([]byte, receiveBufferSize)
+	_, err := c.in.Read(bb)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.conn.Write(bb)
+	return err
 }
 
 func (c *telnetClient) Receive() error {

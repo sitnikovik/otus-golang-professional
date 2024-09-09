@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"time"
 )
 
 func main() {
@@ -13,5 +15,23 @@ func main() {
 		log.Fatalf("parse input err: %v", err)
 	}
 
-	log.Println(args, flags)
+	var addr string
+	if args.Port != 0 {
+		addr = fmt.Sprintf("%s:%d", args.Address, args.Port)
+	} else {
+		addr = args.Address
+	}
+	telnetClient := NewTelnetClient(
+		addr,
+		time.Duration(flags.Timeout)*time.Second,
+		os.Stdin,
+		os.Stdout,
+	)
+
+	telnetClient.Connect()
+	defer telnetClient.Close()
+
+	for {
+		telnetClient.Receive()
+	}
 }

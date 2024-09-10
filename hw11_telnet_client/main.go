@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -31,8 +32,27 @@ func main() {
 	telnetClient.Connect()
 	defer telnetClient.Close()
 
-	for {
-		telnetClient.Send()
-		telnetClient.Receive()
-	}
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		for {
+			err := telnetClient.Send()
+			if err != nil {
+				log.Printf("send err: %v", err)
+				break
+			}
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		for {
+			err := telnetClient.Receive()
+			if err != nil {
+				log.Printf("receive err: %v", err)
+				break
+			}
+		}
+	}()
+	wg.Wait()
 }

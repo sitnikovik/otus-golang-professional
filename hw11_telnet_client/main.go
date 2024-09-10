@@ -32,6 +32,7 @@ func main() {
 	defer telnetClient.Close()
 
 	for {
+		telnetClient.Send()
 		telnetClient.Receive()
 	}
 }

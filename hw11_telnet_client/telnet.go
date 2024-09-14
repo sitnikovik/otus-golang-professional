@@ -1,82 +1,91 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"io"
-	"log"
 	"net"
 	"time"
 )
 
-// receiveBufferSize is the size of the buffer for receiving data.
-const receiveBufferSize = 1024
-
 // TelnetClient describes the Telnet client.
 type TelnetClient interface {
-	Connect() error
 	io.Closer
+
+	// Connect connects to the server.
+	Connect() error
+	// Send sends data to the server.
 	Send() error
+	// Receive receives data from the server.
 	Receive() error
 }
 
+// telnetClient implements the TelnetClient interface.
 type telnetClient struct {
-	conn    io.ReadWriteCloser
+	conn net.Conn
+
+	addr    string
+	port    int
 	timeout time.Duration
-	in      io.ReadCloser
-	out     io.Writer
+
+	stdin  io.Reader
+	stdout io.Writer
 }
 
-// NewTelnetClient returns a new TelnetClient.
-func NewTelnetClient(
-	address string,
-	timeout time.Duration,
-	in io.ReadCloser,
-	out io.Writer,
-) TelnetClient {
-	// Place your code here.
-	// P.S. Author's solution takes no more than 50 lines.
-	conn, err := net.DialTimeout("tcp", address, timeout)
-	if err != nil {
-		log.Fatalf("tcp err: %v", err)
-		return nil
-	}
-
+// NewTelnetClient creates a new TelnetClient.
+func NewTelnetClient(addr string, port int, timeout time.Duration, stdin io.Reader, stdout io.Writer) TelnetClient {
 	return &telnetClient{
-		conn:    conn,
+		addr:    addr,
+		port:    port,
 		timeout: timeout,
-		in:      in,
-		out:     out,
+		stdin:   stdin,
+		stdout:  stdout,
 	}
 }
 
-// Place your code here.
-// P.S. Author's solution takes no more than 50 lines.
-func (c *telnetClient) Connect() error {
-	// Connection is already established in NewTelnetClient
+// Connect connects to the server.
+func (t *telnetClient) Connect() error {
+	var err error
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", t.addr, t.port), t.timeout)
+	if err != nil {
+		return err
+	}
+	t.conn = conn
 	return nil
 }
 
-func (c *telnetClient) Close() error {
-	return c.conn.Close()
-}
-
-func (c *telnetClient) Send() error {
-	bb := make([]byte, receiveBufferSize)
-	_, err := c.in.Read(bb)
+// Send sends data to the server.
+func (t *telnetClient) Send() error {
+	reader := bufio.NewReader(t.stdin)
+	message, err := reader.ReadString('\n')
 	if err != nil {
 		return err
 	}
-
-	_, err = c.conn.Write(bb)
-	return err
-}
-
-func (c *telnetClient) Receive() error {
-	bb := make([]byte, receiveBufferSize)
-	n, err := c.conn.Read(bb)
+	_, err = t.conn.Write([]byte(message))
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	_, err = c.out.Write(bb[:n])
-	return err
+// Receive receives data from the server.
+func (t *telnetClient) Receive() error {
+	reader := bufio.NewReader(t.conn)
+	message, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprint(t.stdout, message)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Close closes the connection to the server.
+func (t *telnetClient) Close() error {
+	if t.conn != nil {
+		return t.conn.Close()
+	}
+	return nil
 }

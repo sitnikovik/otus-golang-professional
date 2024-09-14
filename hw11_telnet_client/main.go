@@ -1,58 +1,77 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
-	"sync"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
 func main() {
-	// Place your code here,
-	// P.S. Do not rush to throw context down, think think if it is useful with blocking operation?
 	args, flags, err := ParseInput(os.Args)
 	if err != nil {
 		log.Fatalf("parse input err: %v", err)
 	}
 
-	var addr string
-	if args.Port != 0 {
-		addr = fmt.Sprintf("%s:%d", args.Address, args.Port)
-	} else {
-		addr = args.Address
+	client := NewTelnetClient(args.Address, args.Port, time.Duration(flags.Timeout), os.Stdin, os.Stdout)
+
+	if err := client.Connect(); err != nil {
+		log.Fatalf("Failed to connect: %v", err)
 	}
-	telnetClient := NewTelnetClient(
-		addr,
-		time.Duration(flags.Timeout)*time.Second,
-		os.Stdin,
-		os.Stdout,
-	)
+	defer client.Close()
 
-	telnetClient.Connect()
-	defer telnetClient.Close()
+	// Создаем контекст с отменой
+	ctx, cancel := context.WithCancel(context.Background())
 
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		for {
-			err := telnetClient.Send()
-			if err != nil {
-				log.Printf("send err: %v", err)
-				break
+	// Ловим системные сигналы (Ctrl+C) и EOF (Ctrl+D)
+	go handleSignals(cancel)
+
+	// Запускаем горутины для отправки и получения данных
+	go sendRoutine(ctx, client)
+	go receiveRoutine(ctx, client)
+
+	// Ожидаем завершения работы по сигналу
+	<-ctx.Done()
+	fmt.Fprintln(os.Stderr, "Connection closed")
+}
+
+func handleSignals(cancel context.CancelFunc) {
+	sigsCh := make(chan os.Signal, 1)
+	signal.Notify(sigsCh, syscall.SIGINT, syscall.SIGTERM)
+
+	// Ожидаем сигнала
+	<-sigsCh
+	fmt.Fprintln(os.Stderr, "Received interrupt signal, shutting down...")
+	cancel()
+}
+
+func sendRoutine(ctx context.Context, client TelnetClient) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			if err := client.Send(); err != nil {
+				fmt.Fprintln(os.Stderr, "Send error:", err)
+				return
 			}
 		}
-	}()
-	go func() {
-		defer wg.Done()
-		for {
-			err := telnetClient.Receive()
-			if err != nil {
-				log.Printf("receive err: %v", err)
-				break
+	}
+}
+
+func receiveRoutine(ctx context.Context, client TelnetClient) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			if err := client.Receive(); err != nil {
+				fmt.Fprintln(os.Stderr, "Receive error:", err)
+				return
 			}
 		}
-	}()
-	wg.Wait()
+	}
 }

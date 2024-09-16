@@ -11,22 +11,23 @@ import (
 )
 
 func main() {
+	// Парсим входные аргументы и флаги
 	args, flags, err := ParseInput(os.Args)
 	if err != nil {
 		log.Fatalf("parse input err: %v", err)
 	}
 
-	client := NewTelnetClient(args.Address, args.Port, time.Duration(flags.Timeout), os.Stdin, os.Stdout)
-
+	// Создаем клиент и подключаемся к серверу
+	addr := fmt.Sprintf("%s:%d", args.Address, args.Port)
+	client := NewTelnetClient(addr, time.Duration(flags.Timeout)*time.Second, os.Stdin, os.Stdout)
 	if err := client.Connect(); err != nil {
 		log.Fatalf("Failed to connect: %v", err)
 	}
 	defer client.Close()
 
-	// Создаем контекст с отменой
 	ctx, cancel := context.WithCancel(context.Background())
 
-	// Ловим системные сигналы (Ctrl+C) и EOF (Ctrl+D)
+	// Ловим системные сигналы для корректного завершения работы
 	go handleSignals(cancel)
 
 	// Запускаем горутины для отправки и получения данных
@@ -38,16 +39,17 @@ func main() {
 	fmt.Fprintln(os.Stderr, "Connection closed")
 }
 
+// handleSignals обрабатывает системные сигналы для корректного завершения работы.
 func handleSignals(cancel context.CancelFunc) {
 	sigsCh := make(chan os.Signal, 1)
 	signal.Notify(sigsCh, syscall.SIGINT, syscall.SIGTERM)
 
-	// Ожидаем сигнала
 	<-sigsCh
 	fmt.Fprintln(os.Stderr, "Received interrupt signal, shutting down...")
 	cancel()
 }
 
+// sendRoutine запускает рутину для отправки данных на телнет-сервер.
 func sendRoutine(ctx context.Context, client TelnetClient) {
 	for {
 		select {
@@ -62,6 +64,7 @@ func sendRoutine(ctx context.Context, client TelnetClient) {
 	}
 }
 
+// receiveRoutine запускает рутину для получения данных от телнет-сервера.
 func receiveRoutine(ctx context.Context, client TelnetClient) {
 	for {
 		select {

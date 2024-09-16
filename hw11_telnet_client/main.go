@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/signal"
@@ -26,13 +27,21 @@ func main() {
 	defer client.Close()
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	cancelCh := make(chan struct{})
+
+	// Горутина для обработки сигнала отмены
+	go func() {
+		<-cancelCh
+		cancel()
+	}()
 
 	// Ловим системные сигналы для корректного завершения работы
-	go handleSignals(cancel)
+	go handleSignals(cancelCh)
 
 	// Запускаем горутины для отправки и получения данных
-	go sendRoutine(ctx, client)
-	go receiveRoutine(ctx, client)
+	go sendRoutine(ctx, cancelCh, client)
+	go receiveRoutine(ctx, cancelCh, client)
 
 	// Ожидаем завершения работы по сигналу
 	<-ctx.Done()
@@ -40,23 +49,28 @@ func main() {
 }
 
 // handleSignals обрабатывает системные сигналы для корректного завершения работы.
-func handleSignals(cancel context.CancelFunc) {
+func handleSignals(cancelCh chan struct{}) {
 	sigsCh := make(chan os.Signal, 1)
 	signal.Notify(sigsCh, syscall.SIGINT, syscall.SIGTERM)
 
 	<-sigsCh
 	fmt.Fprintln(os.Stderr, "Received interrupt signal, shutting down...")
-	cancel()
+	cancelCh <- struct{}{}
 }
 
 // sendRoutine запускает рутину для отправки данных на телнет-сервер.
-func sendRoutine(ctx context.Context, client TelnetClient) {
+func sendRoutine(ctx context.Context, cancelCh chan struct{}, client TelnetClient) {
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		default:
 			if err := client.Send(); err != nil {
+				if err == io.EOF {
+					fmt.Fprintln(os.Stderr, "EOF detected, closing connection..")
+					cancelCh <- struct{}{}
+					return
+				}
 				fmt.Fprintln(os.Stderr, "Send error:", err)
 				return
 			}
@@ -65,7 +79,7 @@ func sendRoutine(ctx context.Context, client TelnetClient) {
 }
 
 // receiveRoutine запускает рутину для получения данных от телнет-сервера.
-func receiveRoutine(ctx context.Context, client TelnetClient) {
+func receiveRoutine(ctx context.Context, cancelCh chan struct{}, client TelnetClient) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -73,6 +87,7 @@ func receiveRoutine(ctx context.Context, client TelnetClient) {
 		default:
 			if err := client.Receive(); err != nil {
 				fmt.Fprintln(os.Stderr, "Receive error:", err)
+				cancelCh <- struct{}{}
 				return
 			}
 		}

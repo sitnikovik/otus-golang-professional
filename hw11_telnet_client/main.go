@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -66,7 +67,7 @@ func sendRoutine(ctx context.Context, cancelCh chan struct{}, client TelnetClien
 			return
 		default:
 			if err := client.Send(); err != nil {
-				if err == io.EOF {
+				if errors.Is(err, io.EOF) {
 					fmt.Fprintln(os.Stderr, "EOF detected, closing connection..")
 					cancelCh <- struct{}{}
 					return

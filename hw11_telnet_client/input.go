@@ -55,9 +55,10 @@ func parseFlag(flags *Flags, in string) (bool, error) {
 	key, val := parts[0], parts[1]
 
 	if key == "--timeout" {
+		val = strings.TrimSuffix(val, "s")
 		ttl, err := strconv.Atoi(val)
 		if err != nil {
-			return false, fmt.Errorf("timeout err: %w", err)
+			return false, fmt.Errorf("parse timeout flag err: %w", err)
 		}
 		flags.Timeout = ttl
 		return true, nil

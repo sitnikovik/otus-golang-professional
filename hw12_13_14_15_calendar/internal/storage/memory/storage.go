@@ -12,6 +12,10 @@ import (
 type Storage interface {
 	// Get returns the value by key
 	Get(key string) (string, bool, error)
+	// Set sets the value by key
+	Set(key, value string) error
+	// Delete deletes the value by key
+	Delete(key string) error
 }
 
 type storage struct {
@@ -21,7 +25,7 @@ type storage struct {
 }
 
 // New creates and returns the in-memory storage instance
-func New(redis *redis.Client) Storage {
+func NewRedis(redis *redis.Client) Storage {
 	return &storage{
 		redisClient: redis,
 	}
@@ -43,4 +47,30 @@ func (s *storage) Get(key string) (string, bool, error) {
 	}
 
 	return v, true, nil
+}
+
+// Set sets the value by key
+func (s *storage) Set(key, value string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	cmd := s.redisClient.Set(key, value, 0)
+	if cmd == nil {
+		return fmt.Errorf("redis cmd is nil")
+	}
+
+	return nil
+}
+
+// Delete deletes the value by key
+func (s *storage) Delete(key string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	cmd := s.redisClient.Del(key)
+	if cmd == nil {
+		return fmt.Errorf("redis cmd is nil")
+	}
+
+	return nil
 }

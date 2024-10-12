@@ -10,7 +10,21 @@ import (
 )
 
 const (
+	// eventsTable is the name of the table for events
 	eventsTable = "events"
+)
+
+var (
+	// allEventColumns is the list of fields for the event entity
+	allEventColumns = []string{
+		"id",
+		"title",
+		"created_at",
+		"finished_at",
+		"description",
+		"owner_id",
+		"notify_before",
+	}
 )
 
 // ListFilter describes the filter for the list of events
@@ -123,7 +137,7 @@ func (s *pgStorage) DeleteEvent(ctx context.Context, eventID string) error {
 // GetEvent returns the event by ID
 func (s *pgStorage) GetEvent(ctx context.Context, eventID string) (*storage.Event, error) {
 	sb := squirrel.
-		Select("id", "title").
+		Select(allEventColumns...).
 		From(eventsTable).
 		PlaceholderFormat(squirrel.Dollar).
 		Where(squirrel.Eq{"id": eventID})
@@ -146,7 +160,7 @@ func (s *pgStorage) GetEvent(ctx context.Context, eventID string) (*storage.Even
 // GetEvents returns the events by filter
 func (s *pgStorage) GetEvents(ctx context.Context, filter ListFilter) ([]*storage.Event, error) {
 	sb := squirrel.
-		Select("id", "title").
+		Select(allEventColumns...).
 		From(eventsTable).
 		PlaceholderFormat(squirrel.Dollar)
 

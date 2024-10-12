@@ -13,6 +13,7 @@ const (
 	eventsTable = "events"
 )
 
+// ListFilter describes the filter for the list of events
 type ListFilter struct {
 	IDs []string
 }
@@ -30,13 +31,14 @@ type Storage interface {
 	GetEvents(ctx context.Context, filter ListFilter) ([]*storage.Event, error)
 
 	// Close closes the storage
-	Close() error
+	Close(ctx context.Context) error
 }
 
 type pgStorage struct {
 	db *pgx.Conn // Пул коннектов к БД
 }
 
+// New creates and returns the sql storage instance
 func New(pg *pgx.Conn) Storage {
 	return &pgStorage{
 		db: pg,
@@ -44,9 +46,8 @@ func New(pg *pgx.Conn) Storage {
 }
 
 // Close closes the storage
-func (s *pgStorage) Close() error {
-	// TODO
-	return nil
+func (s *pgStorage) Close(ctx context.Context) error {
+	return s.db.Close(ctx)
 }
 
 // CreateEvent creates a new event

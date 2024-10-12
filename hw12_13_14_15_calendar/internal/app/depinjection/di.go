@@ -46,8 +46,7 @@ func (d *dicontainer) Redis() memorystorage.Storage {
 			Addr:    d.conf.Redis.Addr,
 		})
 		if cl == nil {
-			log.Fatal("redis client is nil on creation")
-			return nil
+			log.Fatal("redis client is nil on creation") //nolint:gocritic
 		}
 		d.redis = memorystorage.NewRedis(cl)
 	}
@@ -68,8 +67,7 @@ func (d *dicontainer) Postgres() sqlstorage.Storage {
 		)
 		db, err := pgx.Connect(context.Background(), dsn)
 		if err != nil {
-			log.Fatal("failed to connect to postgres: " + err.Error())
-			return nil
+			log.Fatal("failed to connect to postgres: " + err.Error()) //nolint:gocritic
 		}
 		d.postgres = sqlstorage.New(db)
 	}

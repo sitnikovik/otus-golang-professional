@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app/depinjection"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/memory"
 )
 
 var configFile string
@@ -35,16 +35,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	logg := logger.New(config.Logger.Level)
-
-	// Storage init
-	storage := memorystorage.New()
+	logger.Initialize(logger.LevelFromString(config.Logger.Level))
 
 	// App init
-	calendar := app.New(logg, storage)
+	di := depinjection.NewDIContainer(config)
+	calendarApp := app.New(di)
 
 	// Servers
-	server := internalhttp.NewServer(logg, calendar)
+	server := internalhttp.NewServer(calendarApp)
 
 	// Run the app
 	ctx, cancel := signal.NotifyContext(
@@ -59,12 +57,12 @@ func main() {
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
-			logg.Error("failed to stop http server: " + err.Error())
+			logger.Error("failed to stop http server: " + err.Error())
 		}
 	}()
-	logg.Info("calendar is running...")
+	logger.Info("calendar is running...")
 	if err := server.Start(ctx); err != nil {
-		logg.Error("failed to start http server: " + err.Error())
+		logger.Error("failed to start http server: " + err.Error())
 		cancel()
 		os.Exit(1) //nolint:gocritic
 	}

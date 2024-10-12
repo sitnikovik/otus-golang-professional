@@ -1,26 +1,16 @@
 package app
 
 import (
-	"context"
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app/depinjection"
 )
 
 type App struct { // TODO
+	di depinjection.DIContainer
 }
 
-type Logger interface { // TODO
+// New creates and returns the app instance
+func New(di depinjection.DIContainer) *App {
+	return &App{
+		di: di,
+	}
 }
-
-type Storage interface { // TODO
-}
-
-func New(logger Logger, storage Storage) *App {
-	return &App{}
-}
-
-func (a *App) CreateEvent(ctx context.Context, id, title string) error {
-	// TODO
-	return nil
-	// return a.storage.CreateEvent(storage.Event{ID: id, Title: title})
-}
-
-// TODO

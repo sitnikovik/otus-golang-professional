@@ -65,7 +65,7 @@ func (s *Server) Stop(ctx context.Context) error {
 // routes defines the routes of the HTTP server
 func (s *Server) routes() http.Handler {
 	mux := mux.NewRouter()
-	mux.HandleFunc("/", s.handlerIndex()).Methods(http.MethodGet)
+	mux.HandleFunc("/", loggingMiddleware(s.handlerIndex())).Methods(http.MethodGet)
 	mux.HandleFunc("/event", s.handlerCreateEvent()).Methods(http.MethodPut)
 	mux.HandleFunc("/event/{id}", s.handlerGetEvent()).Methods(http.MethodGet)
 	mux.HandleFunc("/event/{id}", s.handlerUpdateEvent()).Methods(http.MethodPost)

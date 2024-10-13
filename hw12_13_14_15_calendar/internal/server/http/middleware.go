@@ -2,10 +2,13 @@ package http
 
 import (
 	"net/http"
+
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
 )
 
-func loggingMiddleware(next http.Handler) http.Handler { //nolint:unused
+func loggingMiddleware(next http.HandlerFunc) http.HandlerFunc { //nolint:unused
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// TODO
+		logger.Infof("Request: %s %s", r.Method, r.URL.Path)
+		next(w, r)
 	})
 }

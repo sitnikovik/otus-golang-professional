@@ -2,15 +2,15 @@ package logger
 
 import (
 	"fmt"
-	"log/slog"
+	"time"
 )
 
 var (
 	level Level = InfoLevel
 )
 
-// Initialize initializes the logger with the provided level
-func Initialize(l Level) {
+// SetLevel initializes the logger with the provided level
+func SetLevel(l Level) {
 	level = l
 }
 
@@ -21,8 +21,8 @@ func Debugf(format string, a ...interface{}) {
 
 // Debug logs the debug message
 func Debug(msg string) {
-	if level >= DebugLevel {
-		slog.Debug(msg)
+	if level <= DebugLevel {
+		print(msg)
 	}
 }
 
@@ -33,8 +33,8 @@ func Infof(format string, a ...interface{}) {
 
 // Info logs the info message
 func Info(msg string) {
-	if level >= InfoLevel {
-		slog.Info(msg)
+	if level <= InfoLevel {
+		print(msg)
 	}
 }
 
@@ -45,8 +45,8 @@ func Warningf(format string, a ...interface{}) {
 
 // Warning logs the warning message
 func Warning(msg string) {
-	if level >= WarningLevel {
-		slog.Warn(msg)
+	if level <= WarningLevel {
+		print(msg)
 	}
 }
 
@@ -57,8 +57,8 @@ func Errorf(format string, a ...interface{}) {
 
 // Error logs the error message
 func Error(msg string) {
-	if level >= ErrorLevel {
-		slog.Error(msg)
+	if level <= ErrorLevel {
+		print(msg)
 	}
 }
 
@@ -69,8 +69,8 @@ func Alertf(format string, a ...interface{}) {
 
 // Alert logs the alert message
 func Alert(msg string) {
-	if level >= AlertLevel {
-		slog.Error(msg) // slog.Alert is not available
+	if level <= AlertLevel {
+		print(msg)
 	}
 }
 
@@ -81,7 +81,18 @@ func Criticalf(format string, a ...interface{}) {
 
 // Critical logs the critical message
 func Critical(msg string) {
-	if level >= CriticalLevel {
-		slog.Error(msg) // slog.Critical is not available
+	if level <= CriticalLevel {
+		print(msg)
 	}
+}
+
+// print logs the message with the current time
+func print(msg string) {
+	// no using slog package cause of diffuculties with level setting
+	fmt.Printf("%s [%s]: %s\n", currTime(), level, msg)
+}
+
+// currTime returns the current time in the format "Day Mon 02 15:04:05 2006"
+func currTime() string {
+	return time.Now().Format(time.RFC1123)
 }

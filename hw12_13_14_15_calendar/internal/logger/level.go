@@ -1,5 +1,9 @@
 package logger
 
+import (
+	"strings"
+)
+
 // Level defines the log level
 type Level int
 
@@ -18,8 +22,29 @@ const (
 	CriticalLevel
 )
 
+// String returns the string representation of the log level
+func (l Level) String() string {
+	switch l {
+	case DebugLevel:
+		return "DEBUG"
+	case InfoLevel:
+		return "INFO"
+	case WarningLevel:
+		return "WARNING"
+	case ErrorLevel:
+		return "ERROR"
+	case AlertLevel:
+		return "ALERT"
+	case CriticalLevel:
+		return "CRITICAL"
+	default:
+		return "UNKNOWN"
+	}
+}
+
 func LevelFromString(level string) Level {
-	switch level {
+	lvl := strings.ToLower(level)
+	switch lvl {
 	case "debug":
 		return DebugLevel
 	case "info":

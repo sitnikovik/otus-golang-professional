@@ -8,7 +8,7 @@ import (
 
 func loggingMiddleware(next http.HandlerFunc) http.HandlerFunc { //nolint:unused
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger.Infof("Request: %s %s", r.Method, r.URL.Path)
+		logger.Debugf("Request: %s %s", r.Method, r.URL.Path)
 		next(w, r)
 	})
 }

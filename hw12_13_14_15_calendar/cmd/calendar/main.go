@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -16,10 +17,10 @@ import (
 	internalhttp "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http"
 )
 
-var configFile string
+var configPath string
 
 func init() {
-	flag.StringVar(&configFile, "config", "./configs/config.yaml", "Path to configuration file")
+	flag.StringVar(&configPath, "config", ".env", "Path to configuration file")
 }
 
 func main() {
@@ -31,11 +32,11 @@ func main() {
 	}
 
 	// Configuration init
-	config, err := config.Load(configFile)
+	config, err := config.NewConfig(configPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("failed to load config: %w", err))
 	}
-	logger.Initialize(logger.LevelFromString(config.Logger.Level))
+	logger.SetLevel(logger.LevelFromString(config.Logger.Level))
 
 	// App init
 	di := depinjection.NewDIContainer(config)

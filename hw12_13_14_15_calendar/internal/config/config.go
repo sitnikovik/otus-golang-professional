@@ -14,6 +14,8 @@ type Config struct {
 	Redis RedisConf `yaml:"redis"`
 	// PG describes the postgres configuration
 	PG PGConf `yaml:"pg"`
+	// HTTP describes the HTTP server configuration
+	HTTP HTTPConf `yaml:"http"`
 }
 
 // LoggerConf describes the logging configuration
@@ -41,6 +43,12 @@ type PGConf struct {
 	Host string `yaml:"host"`
 	// Port describes the postgres port
 	Port string `yaml:"port"`
+}
+
+// HTTPConf describes the HTTP server configuration
+type HTTPConf struct {
+	Port    string `yaml:"port"`
+	Timeout int    `yaml:"timeout"`
 }
 
 // Load parses the app configuration with provided path and returns it

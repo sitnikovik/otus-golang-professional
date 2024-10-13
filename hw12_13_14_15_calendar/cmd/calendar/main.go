@@ -42,7 +42,7 @@ func main() {
 	calendarApp := app.New(di)
 
 	// Servers
-	server := internalhttp.NewServer(calendarApp)
+	server := internalhttp.NewServer(calendarApp, config.HTTP)
 
 	// Run the app
 	ctx, cancel := signal.NotifyContext(

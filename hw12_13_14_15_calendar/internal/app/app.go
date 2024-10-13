@@ -8,6 +8,10 @@ type App struct { // TODO
 	di depinjection.DIContainer
 }
 
+func (a *App) DIContainer() depinjection.DIContainer {
+	return nil
+}
+
 // New creates and returns the app instance
 func New(di depinjection.DIContainer) *App {
 	return &App{

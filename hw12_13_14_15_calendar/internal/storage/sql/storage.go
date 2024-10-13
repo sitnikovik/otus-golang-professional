@@ -6,6 +6,7 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/storage"
 )
 
@@ -66,6 +67,8 @@ func (s *pgStorage) Close(ctx context.Context) error {
 
 // CreateEvent creates a new event
 func (s *pgStorage) CreateEvent(ctx context.Context, event *storage.Event) (string, error) {
+	logger.Debugf("creating event: %v", *event)
+
 	sb := squirrel.
 		Insert(eventsTable).
 		PlaceholderFormat(squirrel.Dollar).
@@ -95,6 +98,8 @@ func (s *pgStorage) CreateEvent(ctx context.Context, event *storage.Event) (stri
 
 // UpdateEvent updates the event
 func (s *pgStorage) UpdateEvent(ctx context.Context, event *storage.Event) error {
+	logger.Debugf("updating event with id(%s)", event.ID)
+
 	sb := squirrel.
 		Update(eventsTable).
 		PlaceholderFormat(squirrel.Dollar).
@@ -116,6 +121,8 @@ func (s *pgStorage) UpdateEvent(ctx context.Context, event *storage.Event) error
 
 // DeleteEvent deletes the event
 func (s *pgStorage) DeleteEvent(ctx context.Context, eventID string) error {
+	logger.Infof("deleting event by id(%s)", eventID)
+
 	sb := squirrel.
 		Delete(eventsTable).
 		PlaceholderFormat(squirrel.Dollar).
@@ -136,6 +143,8 @@ func (s *pgStorage) DeleteEvent(ctx context.Context, eventID string) error {
 
 // GetEvent returns the event by ID
 func (s *pgStorage) GetEvent(ctx context.Context, eventID string) (*storage.Event, error) {
+	logger.Debugf("getting event by id(%s)", eventID)
+
 	sb := squirrel.
 		Select(allEventColumns...).
 		From(eventsTable).

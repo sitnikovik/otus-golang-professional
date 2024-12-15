@@ -10,10 +10,9 @@ import (
 	"time"
 
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
-	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app/depinjection"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http"
+	calendarHttpServer "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http/calendar"
 )
 
 var configPath string
@@ -47,11 +46,13 @@ func main() {
 	logger.Debugf("Specified log level: %s", configLevel)
 
 	// App init
-	di := depinjection.NewDIContainer(config)
-	calendarApp := app.New(di)
+	// di := depinjection.NewDIContainer(config)
+	calendarApp := app.New(
+		app.NewDIContainer(config),
+	)
 
 	// Servers
-	server := internalhttp.NewServer(calendarApp, config.HTTP)
+	server := calendarHttpServer.NewServer(calendarApp, config.HTTP)
 
 	// Run the app
 	ctx, cancel := signal.NotifyContext(
@@ -61,9 +62,9 @@ func main() {
 	defer cancel()
 
 	var wg sync.WaitGroup
-
 	wg.Add(1)
 	go func() {
+		// Graceful shutdown
 		defer wg.Done()
 		<-ctx.Done()
 
@@ -74,7 +75,7 @@ func main() {
 			logger.Criticalf("failed to stop http server: %v", err)
 		}
 	}()
-
+	// Start the server
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -84,7 +85,5 @@ func main() {
 			os.Exit(1) //nolint:gocritic
 		}
 	}()
-
 	wg.Wait()
-
 }

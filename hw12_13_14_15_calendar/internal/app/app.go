@@ -8,6 +8,7 @@ type App struct { // TODO
 	di depinjection.DIContainer
 }
 
+// DIContainer returns the DI container instance
 func (a *App) DIContainer() depinjection.DIContainer {
 	return nil
 }

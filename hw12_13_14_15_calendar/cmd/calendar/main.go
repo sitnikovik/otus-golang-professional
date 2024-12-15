@@ -3,10 +3,9 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
-	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -20,7 +19,12 @@ import (
 var configPath string
 
 func init() {
-	flag.StringVar(&configPath, "config", ".env", "Path to configuration file")
+	flag.StringVar(
+		&configPath,
+		"config",
+		".env",
+		"Path to configuration file",
+	)
 }
 
 func main() {
@@ -34,9 +38,13 @@ func main() {
 	// Configuration init
 	config, err := config.NewConfig(configPath)
 	if err != nil {
-		log.Fatal(fmt.Errorf("failed to load config: %w", err))
+		logger.Emergencyf("failed to load config: %v", err)
 	}
-	logger.SetLevel(logger.LevelFromString(config.Logger.Level))
+	logger.Debugf("Used config file: %s", configPath)
+
+	configLevel := config.Logger.Level
+	logger.SetLevel(logger.LevelFromString(configLevel))
+	logger.Debugf("Specified log level: %s", configLevel)
 
 	// App init
 	di := depinjection.NewDIContainer(config)
@@ -51,20 +59,32 @@ func main() {
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP,
 	)
 	defer cancel()
+
+	var wg sync.WaitGroup
+
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		<-ctx.Done()
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
-			logger.Error("failed to stop http server: " + err.Error())
+			logger.Criticalf("failed to stop http server: %v", err)
 		}
 	}()
-	logger.Info("calendar is running...")
-	if err := server.Start(ctx); err != nil {
-		logger.Error("failed to start http server: " + err.Error())
-		cancel()
-		os.Exit(1) //nolint:gocritic
-	}
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := server.Start(ctx); err != nil {
+			logger.Errorf("failed to start http server: %v", err)
+			cancel()
+			os.Exit(1) //nolint:gocritic
+		}
+	}()
+
+	wg.Wait()
+
 }

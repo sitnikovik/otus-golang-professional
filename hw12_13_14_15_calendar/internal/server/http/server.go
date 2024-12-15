@@ -38,12 +38,11 @@ func (s *Server) Start(ctx context.Context) error {
 		Addr:    ":" + s.httpconf.Port,
 		Handler: s.routes(),
 	}
-
 	// Run the server in a separate goroutine
 	go func() {
-		logger.Infof("Starting HTTP server on %s\n", s.server.Addr)
+		logger.Infof("Starting HTTP server on %s", s.server.Addr)
 		if err := s.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Criticalf("listen err: %s\n", err)
+			logger.Criticalf("listen err: %s", err)
 		}
 	}()
 
@@ -65,11 +64,46 @@ func (s *Server) Stop(ctx context.Context) error {
 // routes defines the routes of the HTTP server
 func (s *Server) routes() http.Handler {
 	mux := mux.NewRouter()
-	mux.HandleFunc("/", loggingMiddleware(s.handlerIndex())).Methods(http.MethodGet)
-	mux.HandleFunc("/event", s.handlerCreateEvent()).Methods(http.MethodPut)
-	mux.HandleFunc("/event/{id}", s.handlerGetEvent()).Methods(http.MethodGet)
-	mux.HandleFunc("/event/{id}", s.handlerUpdateEvent()).Methods(http.MethodPost)
-	mux.HandleFunc("/event/{id}", s.handlerDeleteEvent()).Methods(http.MethodDelete)
+
+	// Index
+	mux.HandleFunc(
+		"/",
+		loggingMiddleware(
+			s.handlerIndex(),
+		),
+	).Methods(http.MethodGet)
+
+	// Create a new event
+	mux.HandleFunc(
+		"/event",
+		loggingMiddleware(
+			s.handlerCreateEvent(),
+		),
+	).Methods(http.MethodPut)
+
+	// Get event by ID
+	mux.HandleFunc(
+		"/event/{id}",
+		loggingMiddleware(
+			s.handlerGetEvent(),
+		),
+	).Methods(http.MethodGet)
+
+	// Update an event
+	mux.HandleFunc(
+		"/event/{id}",
+		loggingMiddleware(
+			s.handlerUpdateEvent(),
+		),
+	).Methods(http.MethodPost)
+
+	// Delete an event
+	mux.HandleFunc(
+		"/event/{id}",
+		loggingMiddleware(
+			s.handlerDeleteEvent(),
+		),
+	).Methods(http.MethodDelete)
 
 	return mux
 }

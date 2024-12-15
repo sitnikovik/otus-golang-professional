@@ -98,6 +98,7 @@ func Emergencyf(format string, a ...interface{}) {
 func Emergency(msg string) {
 	if level >= EmergencyLevel {
 		log(msg)
+		panic(msg)
 	}
 }
 

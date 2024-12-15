@@ -18,7 +18,7 @@ func (s *PgStorage) DeleteEvent(ctx context.Context, eventID string) error {
 		return err
 	}
 
-	_, err = s.db.Exec(ctx, sql, args...)
+	_, err = s.db.Exec(sql, args...)
 	if err != nil {
 		return err
 	}

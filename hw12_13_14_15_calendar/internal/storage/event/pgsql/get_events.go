@@ -39,7 +39,7 @@ func (s *PgStorage) GetEvents(ctx context.Context, filter eventFilter.Filter) ([
 		return nil, err
 	}
 
-	rows, err := s.db.Query(ctx, sql, args...)
+	rows, err := s.db.Query(sql, args...)
 	if err != nil {
 		return nil, err
 	}

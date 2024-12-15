@@ -3,7 +3,7 @@ package pgsql
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx"
 )
 
 const (
@@ -12,17 +12,18 @@ const (
 )
 
 type PgStorage struct {
-	db *pgx.Conn // Пул коннектов к БД
+	db *pgx.ConnPool // Пул коннектов к БД
 }
 
 // New creates and returns the sql storage instance
-func New(pg *pgx.Conn) *PgStorage {
+func New(pg *pgx.ConnPool) *PgStorage {
 	return &PgStorage{
 		db: pg,
 	}
 }
 
 // Close closes the storage
-func (s *PgStorage) Close(ctx context.Context) error {
-	return s.db.Close(ctx)
+func (s *PgStorage) Close(_ context.Context) error {
+	s.db.Close()
+	return nil
 }

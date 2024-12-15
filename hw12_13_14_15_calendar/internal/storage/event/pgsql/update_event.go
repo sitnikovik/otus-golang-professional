@@ -9,7 +9,7 @@ import (
 )
 
 // UpdateEvent updates the event
-func (s *PgStorage) UpdateEvent(ctx context.Context, event *eventModel.Event) error {
+func (s *PgStorage) UpdateEvent(_ context.Context, event *eventModel.Event) error {
 	sb := squirrel.
 		Update(eventsTable).
 		PlaceholderFormat(squirrel.Dollar).
@@ -21,7 +21,7 @@ func (s *PgStorage) UpdateEvent(ctx context.Context, event *eventModel.Event) er
 		return err
 	}
 
-	_, err = s.db.Exec(ctx, sql, args...)
+	_, err = s.db.Exec(sql, args...)
 	if err != nil {
 		return err
 	}

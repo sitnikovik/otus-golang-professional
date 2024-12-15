@@ -5,15 +5,6 @@ import (
 	"time"
 )
 
-var (
-	level Level = InfoLevel
-)
-
-// SetLevel initializes the logger with the provided level
-func SetLevel(l Level) {
-	level = l
-}
-
 // Debugf logs the debug with formatted message
 func Debugf(format string, a ...interface{}) {
 	Debug(fmt.Sprintf(format, a...))
@@ -21,8 +12,8 @@ func Debugf(format string, a ...interface{}) {
 
 // Debug logs the debug message
 func Debug(msg string) {
-	if level <= DebugLevel {
-		print(msg)
+	if level >= DebugLevel {
+		log(msg)
 	}
 }
 
@@ -33,8 +24,20 @@ func Infof(format string, a ...interface{}) {
 
 // Info logs the info message
 func Info(msg string) {
-	if level <= InfoLevel {
-		print(msg)
+	if level >= InfoLevel {
+		log(msg)
+	}
+}
+
+// WarnNoticefingf logs the notice with formatted message
+func Noticef(format string, a ...interface{}) {
+	Notice(fmt.Sprintf(format, a...))
+}
+
+// Notice logs the notice message
+func Notice(msg string) {
+	if level >= NoticeLevel {
+		log(msg)
 	}
 }
 
@@ -45,20 +48,20 @@ func Warningf(format string, a ...interface{}) {
 
 // Warning logs the warning message
 func Warning(msg string) {
-	if level <= WarningLevel {
-		print(msg)
+	if level >= WarningLevel {
+		log(msg)
 	}
 }
 
 // Errorf logs the error with formatted message
 func Errorf(format string, a ...interface{}) {
-	Warning(fmt.Sprintf(format, a...))
+	Error(fmt.Sprintf(format, a...))
 }
 
 // Error logs the error message
 func Error(msg string) {
-	if level <= ErrorLevel {
-		print(msg)
+	if level >= ErrorLevel {
+		log(msg)
 	}
 }
 
@@ -69,8 +72,8 @@ func Alertf(format string, a ...interface{}) {
 
 // Alert logs the alert message
 func Alert(msg string) {
-	if level <= AlertLevel {
-		print(msg)
+	if level >= AlertLevel {
+		log(msg)
 	}
 }
 
@@ -81,14 +84,31 @@ func Criticalf(format string, a ...interface{}) {
 
 // Critical logs the critical message
 func Critical(msg string) {
-	if level <= CriticalLevel {
-		print(msg)
+	if level >= CriticalLevel {
+		log(msg)
 	}
 }
 
-// print logs the message with the current time
-func print(msg string) {
+// Emergency logs the emergency with formatted message
+func Emergencyf(format string, a ...interface{}) {
+	Emergency(fmt.Sprintf(format, a...))
+}
+
+// Emergency logs the emergency message
+func Emergency(msg string) {
+	if level >= EmergencyLevel {
+		log(msg)
+	}
+}
+
+// log logs the message
+func log(msg string) {
 	// no using slog package cause of diffuculties with level setting
+	echo(msg)
+}
+
+// echo logs the message with the current time
+func echo(msg string) {
 	fmt.Printf("%s [%s]: %s\n", currTime(), level, msg)
 }
 

@@ -7,57 +7,77 @@ import (
 // Level defines the log level
 type Level int
 
+// level is the current logging level
+var level Level = InfoLevel
+
+// SetLevel initializes the logger with the provided level
+func SetLevel(l Level) {
+	level = l
+}
+
 const (
-	// DebugLevel level is used for debugging purposes
-	DebugLevel Level = iota + 1
-	// InfoLevel level is used for informational messages
-	InfoLevel
-	// WarningLevel level is used for warnings
-	WarningLevel
-	// ErrorLevel level is used for errors
-	ErrorLevel
+	// EmergencyLevel level is used for emergency messages
+	EmergencyLevel Level = iota
 	// AlertLevel level is used for alerts
 	AlertLevel
 	// CriticalLevel level is used for critical messages
 	CriticalLevel
+	// ErrorLevel level is used for errors
+	ErrorLevel
+	// WarningLevel level is used for warnings
+	WarningLevel
+	// NoticeLevel level is used for warnings
+	NoticeLevel
+	// InfoLevel level is used for informational messages
+	InfoLevel
+	// DebugLevel level is used for debugging purposes
+	DebugLevel
 )
 
 // String returns the string representation of the log level
 func (l Level) String() string {
 	switch l {
-	case DebugLevel:
-		return "DEBUG"
-	case InfoLevel:
-		return "INFO"
-	case WarningLevel:
-		return "WARNING"
-	case ErrorLevel:
-		return "ERROR"
+	case EmergencyLevel:
+		return "emergency"
 	case AlertLevel:
-		return "ALERT"
+		return "alert"
 	case CriticalLevel:
-		return "CRITICAL"
-	default:
-		return "UNKNOWN"
+		return "critical"
+	case ErrorLevel:
+		return "error"
+	case WarningLevel:
+		return "warning"
+	case NoticeLevel:
+		return "notice"
+	case InfoLevel:
+		return "info"
+	case DebugLevel:
+		return "debug"
 	}
+
+	return ""
 }
 
+// LevelFromString returns the log level from the string
 func LevelFromString(level string) Level {
-	lvl := strings.ToLower(level)
-	switch lvl {
-	case "debug":
-		return DebugLevel
-	case "info":
-		return InfoLevel
-	case "warning":
-		return WarningLevel
-	case "error":
-		return ErrorLevel
+	switch strings.ToLower(level) {
+	case "emergency":
+		return EmergencyLevel
 	case "alert":
 		return AlertLevel
 	case "critical":
 		return CriticalLevel
-	default:
+	case "error":
+		return ErrorLevel
+	case "warning":
+		return WarningLevel
+	case "notice":
+		return NoticeLevel
+	case "info":
 		return InfoLevel
+	case "debug":
+		return DebugLevel
 	}
+
+	return InfoLevel
 }

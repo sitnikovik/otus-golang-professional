@@ -14,6 +14,9 @@ func (s *PgStorage) UpdateEvent(_ context.Context, event *eventModel.Event) erro
 		Update(eventsTable).
 		PlaceholderFormat(squirrel.Dollar).
 		Set("title", event.Title).
+		Set("description", event.Description).
+		Set("finished_at", event.FinishedAt).
+		Set("notify_before", event.NotifyBefore).
 		Where(squirrel.Eq{"id": event.ID})
 
 	sql, args, err := sb.ToSql()

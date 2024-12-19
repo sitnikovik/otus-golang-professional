@@ -9,7 +9,7 @@ import (
 
 // UpdateEvent updates the event.
 func (s *Service) UpdateEvent(ctx context.Context, event *eventModel.Event) error {
-	logger.Debugf("updating event with id(%s)", event.ID)
+	logger.Debugf("updating event with id(%d)", event.ID)
 
 	if err := s.db.UpdateEvent(ctx, event); err != nil {
 		logger.Errorf("failed to update event: %v", err)

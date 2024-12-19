@@ -3,7 +3,11 @@ package calendar
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 
 	eventModel "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/model/event"
 )
@@ -13,18 +17,21 @@ func (s *Server) handlerUpdateEvent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		// Read the request body
-		reader, err := r.GetBody()
-		if err != nil {
-			errorHandler(w,
-				fmt.Errorf("failed to get body: %v", err),
-				http.StatusInternalServerError,
+		// Get the event ID from URI path param
+		vars := mux.Vars(r)
+		id, _ := strconv.Atoi(vars["id"])
+		if id <= 0 {
+			errorHandler(
+				w,
+				fmt.Errorf("event ID is empty or invalid"),
+				http.StatusBadRequest,
 			)
 			return
 		}
-		defer reader.Close()
-		bb := make([]byte, 0, 1024)
-		_, err = reader.Read(bb)
+
+		// Read the request body
+		defer r.Body.Close()
+		bb, err := io.ReadAll(r.Body)
 		if err != nil {
 			errorHandler(w,
 				fmt.Errorf("failed to read body: %v", err),
@@ -34,8 +41,8 @@ func (s *Server) handlerUpdateEvent() http.HandlerFunc {
 		}
 
 		// Unmarshal the request body to the event model
-		event := &eventModel.Event{}
-		err = json.Unmarshal(bb, event)
+		var v eventModel.Event
+		err = json.Unmarshal(bb, &v)
 		if err != nil {
 			errorHandler(w,
 				fmt.Errorf("failed to unmarshal body: %v", err),
@@ -43,9 +50,10 @@ func (s *Server) handlerUpdateEvent() http.HandlerFunc {
 			)
 			return
 		}
+		v.ID = uint64(id)
 
 		// Update the event
-		err = s.app.DI().EventService().UpdateEvent(ctx, event)
+		err = s.app.DI().EventService().UpdateEvent(ctx, &v)
 		if err != nil {
 			errorHandler(w,
 				fmt.Errorf("failed to update event: %v", err),

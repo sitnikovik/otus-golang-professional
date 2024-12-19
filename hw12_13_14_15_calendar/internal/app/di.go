@@ -17,13 +17,13 @@ import (
 // eventService describes the event service
 type eventService interface {
 	// CreateEvent creates a new event
-	CreateEvent(ctx context.Context, event *eventModel.Event) (string, error)
+	CreateEvent(ctx context.Context, event *eventModel.Event) (uint64, error)
 	// UpdateEvent updates the event
 	UpdateEvent(ctx context.Context, event *eventModel.Event) error
 	// DeleteEvent deletes the event
-	DeleteEvent(ctx context.Context, eventID string) error
+	DeleteEvent(ctx context.Context, eventID uint64) error
 	// GetEvent returns the event by ID
-	GetEvent(ctx context.Context, eventID string) (*eventModel.Event, error)
+	GetEvent(ctx context.Context, eventID uint64) (*eventModel.Event, error)
 	// GetEvents returns the events by filter
 	GetEvents(ctx context.Context, filter eventFilter.Filter) ([]*eventModel.Event, error)
 }

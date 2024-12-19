@@ -37,6 +37,6 @@ func (s *Server) handlerCreateEvent() http.HandlerFunc {
 
 		// Write response
 		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(`{"id": "` + id + `"}`))
+		w.Write([]byte(`{"id": "` + fmt.Sprint(id) + `"}`))
 	}
 }

@@ -8,12 +8,12 @@ import (
 )
 
 // GetEvent returns the event by ID.
-func (s *Service) GetEvent(ctx context.Context, eventID string) (*eventModel.Event, error) {
-	logger.Debugf("getting event by id(%s)", eventID)
+func (s *Service) GetEvent(ctx context.Context, eventID uint64) (*eventModel.Event, error) {
+	logger.Debugf("getting event by id(%d)", eventID)
 
 	event, err := s.db.GetEvent(ctx, eventID)
 	if err != nil {
-		logger.Errorf("failed to get event by id(%s): %v", eventID, err)
+		logger.Errorf("failed to get event by id(%d): %v", eventID, err)
 		return nil, err
 	}
 

@@ -4,7 +4,7 @@ import "reflect"
 
 // Filter describes the filter for the list of events
 type Filter struct {
-	IDs   []string
+	IDs   []uint64
 	Limit uint64
 }
 

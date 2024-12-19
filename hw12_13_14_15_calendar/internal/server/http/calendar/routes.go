@@ -31,6 +31,14 @@ func (s *Server) routes() http.Handler {
 		),
 	).Methods(http.MethodPut)
 
+	// Get event list
+	mux.HandleFunc(
+		"/event",
+		middleware.LoggingMiddleware(
+			s.handlerGetEvents(),
+		),
+	).Methods(http.MethodGet)
+
 	// Get event by ID
 	mux.HandleFunc(
 		"/event/{id}",

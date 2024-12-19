@@ -3,6 +3,7 @@ package calendar
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -13,8 +14,8 @@ func (s *Server) handlerDeleteEvent() http.HandlerFunc {
 
 		// Get the event ID from URI path param
 		vars := mux.Vars(r)
-		id := vars["id"]
-		if id == "" {
+		id, _ := strconv.Atoi(vars["id"])
+		if id == 0 {
 			errorHandler(
 				w,
 				fmt.Errorf("event ID is required"),
@@ -24,7 +25,7 @@ func (s *Server) handlerDeleteEvent() http.HandlerFunc {
 		}
 
 		// Delete the event
-		err := s.app.DI().EventService().DeleteEvent(ctx, id)
+		err := s.app.DI().EventService().DeleteEvent(ctx, uint64(id))
 		if err != nil {
 			errorHandler(
 				w,

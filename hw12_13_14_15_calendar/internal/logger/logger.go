@@ -60,6 +60,7 @@ func Errorf(format string, a ...interface{}) {
 
 // Error logs the error message
 func Error(msg string) {
+	fmt.Printf("log: %v\n", log)
 	if level >= ErrorLevel {
 		log(msg)
 	}

@@ -9,9 +9,9 @@ import (
 )
 
 // GetEvent returns the event by ID
-func (s *PgStorage) GetEvent(ctx context.Context, eventID string) (*eventModel.Event, error) {
+func (s *PgStorage) GetEvent(ctx context.Context, eventID uint64) (*eventModel.Event, error) {
 	filter := eventFilter.Filter{
-		IDs:   []string{eventID},
+		IDs:   []uint64{eventID},
 		Limit: 1,
 	}
 
@@ -20,7 +20,7 @@ func (s *PgStorage) GetEvent(ctx context.Context, eventID string) (*eventModel.E
 		return nil, err
 	}
 	if len(events) == 0 {
-		return nil, fmt.Errorf("event with id(%s) not found", eventID)
+		return nil, fmt.Errorf("event with id(%d) not found", eventID)
 	}
 
 	return events[0], nil

@@ -7,7 +7,7 @@ import (
 )
 
 // DeleteEvent deletes the event
-func (s *PgStorage) DeleteEvent(ctx context.Context, eventID string) error {
+func (s *PgStorage) DeleteEvent(ctx context.Context, eventID uint64) error {
 	sb := squirrel.
 		Delete(eventsTable).
 		PlaceholderFormat(squirrel.Dollar).

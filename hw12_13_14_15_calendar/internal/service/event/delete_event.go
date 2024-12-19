@@ -7,7 +7,7 @@ import (
 )
 
 // DeleteEvent deletes the event.
-func (s *Service) DeleteEvent(ctx context.Context, eventID string) error {
+func (s *Service) DeleteEvent(ctx context.Context, eventID uint64) error {
 	logger.Debugf("deleting event by id(%s)", eventID)
 
 	if err := s.db.DeleteEvent(ctx, eventID); err != nil {

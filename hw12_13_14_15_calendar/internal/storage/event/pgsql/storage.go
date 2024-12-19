@@ -11,8 +11,10 @@ const (
 	eventsTable = "events"
 )
 
+// PgStorage is the storage for the events.
 type PgStorage struct {
-	db *pgx.ConnPool // Пул коннектов к БД
+	// db is the connection pool to the database.
+	db *pgx.ConnPool
 }
 
 // New creates and returns the sql storage instance.

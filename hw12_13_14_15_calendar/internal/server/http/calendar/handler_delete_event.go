@@ -15,10 +15,10 @@ func (s *Server) handlerDeleteEvent() http.HandlerFunc {
 		// Get the event ID from URI path param
 		vars := mux.Vars(r)
 		id, _ := strconv.Atoi(vars["id"])
-		if id == 0 {
+		if id <= 0 {
 			errorHandler(
 				w,
-				fmt.Errorf("event ID is required"),
+				fmt.Errorf("event ID is empty or invalid"),
 				http.StatusBadRequest,
 			)
 			return

@@ -11,7 +11,11 @@ import (
 
 // CreateEvent creates a new event.
 func (s *Service) CreateEvent(ctx context.Context, event *eventModel.Event) (uint64, error) {
-	logger.Debugf("creating event: %v", *event)
+	if event == nil {
+		return 0, fmt.Errorf("event is nil")
+	}
+
+	logger.Debugf("creating event with title \"%s\"", event.Title)
 
 	event.CreatedAt = time.Now()
 

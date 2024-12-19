@@ -52,9 +52,19 @@ func (s *PgStorage) GetEvents(ctx context.Context, filter eventFilter.Filter) ([
 	var events []*eventModel.Event
 	for rows.Next() {
 		var event eventModel.Event
-		if err := rows.Scan(&event.ID, &event.Title); err != nil {
+		err = rows.Scan(
+			&event.ID,
+			&event.Title,
+			&event.CreatedAt,
+			&event.FinishedAt,
+			&event.Description,
+			&event.OwnerID,
+			&event.NotifyBefore,
+		)
+		if err != nil {
 			return nil, err
 		}
+
 		events = append(events, &event)
 	}
 

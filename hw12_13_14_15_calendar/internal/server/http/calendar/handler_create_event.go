@@ -3,6 +3,7 @@ package calendar
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 
 	eventModel "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/model/event"
@@ -16,11 +17,22 @@ func (s *Server) handlerCreateEvent() http.HandlerFunc {
 
 		// Read the request body
 		defer r.Body.Close()
-		var v eventModel.Event
-		if err = json.NewDecoder(r.Body).Decode(&v); err != nil {
+		bb, err := io.ReadAll(r.Body)
+		if err != nil {
 			errorHandler(w,
-				fmt.Errorf("failed to decode body: %v", err),
-				http.StatusBadRequest,
+				fmt.Errorf("failed to read body: %v", err),
+				http.StatusInternalServerError,
+			)
+			return
+		}
+
+		// Unmarshal the request body to the event model
+		var v eventModel.Event
+		err = json.Unmarshal(bb, &v)
+		if err != nil {
+			errorHandler(w,
+				fmt.Errorf("failed to unmarshal body: %v", err),
+				http.StatusInternalServerError,
 			)
 			return
 		}

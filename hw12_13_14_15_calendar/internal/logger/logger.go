@@ -105,7 +105,7 @@ func Emergency(msg string) {
 // log logs the message
 func log(lvl Level, msg string) {
 	// no using slog package cause of diffuculties with level setting
-	fmt.Printf("%s [%s]: %s\n", currTime(), level, msg)
+	fmt.Printf("%s [%s]: %s\n", currTime(), lvl, msg)
 }
 
 // currTime returns the current time in the format "Day Mon 02 15:04:05 2006"

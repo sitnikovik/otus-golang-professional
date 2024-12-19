@@ -30,7 +30,10 @@ LABEL MAINTAINERS="student@otus.ru"
 ENV BIN_FILE "/opt/calendar/calendar-app"
 COPY --from=build ${BIN_FILE} ${BIN_FILE}
 
-ENV CONFIG_FILE /etc/calendar/config.toml
-COPY ./configs/config.toml ${CONFIG_FILE}
+ENV CONFIG_FILE /etc/calendar/.env
+COPY ./.env ${CONFIG_FILE}
+
+# Указываем порт, который будет использоваться контейнером
+EXPOSE ${HTTP_PORT}
 
 CMD ${BIN_FILE} -config ${CONFIG_FILE}

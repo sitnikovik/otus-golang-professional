@@ -1,3 +1,5 @@
+include .env
+
 BIN := "./bin/calendar"
 DOCKER_IMG="calendar:develop"
 
@@ -15,8 +17,11 @@ build-img:
 		--build-arg=LDFLAGS="$(LDFLAGS)" \
 		-t $(DOCKER_IMG) \
 		-f build/Dockerfile .
+	
+	
 
 run-img: build-img
+	docker-compose up -d
 	docker run $(DOCKER_IMG)
 
 version: build
@@ -32,3 +37,20 @@ lint: install-lint-deps
 	golangci-lint run ./...
 
 .PHONY: build run build-img run-img version test lint
+
+LOCAL_MIGRATION_DIR=./migrations
+LOCAL_MIGRATION_DSN="host=$(PG_HOST) port=$(PG_PORT) dbname=$(PG_DATABASE) user=$(PG_USER) password=$(PG_PASSWORD)"
+
+## Local db migrations
+.PHONY: local-migration-create
+local-migration-status:
+	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} status -v
+
+.PHONY: local-migration-up
+local-migration-up:
+	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} up -v
+
+.PHONY: local-migration-down
+local-migration-down:
+	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} down -v
+

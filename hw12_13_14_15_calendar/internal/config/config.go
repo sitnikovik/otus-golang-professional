@@ -55,8 +55,12 @@ type PGConf struct {
 
 // HTTPConf describes the HTTP server configuration.
 type HTTPConf struct {
-	Port    string `yaml:"port"`
-	Timeout int    `yaml:"timeout"`
+	// Host describes the HTTP server host.
+	Host string `yaml:"host"`
+	// Port describes the HTTP server port.
+	Port string `yaml:"port"`
+	// Timeout describes the HTTP server timeout.
+	Timeout int `yaml:"timeout"`
 }
 
 // NewConfig creates and returns the new configuration.

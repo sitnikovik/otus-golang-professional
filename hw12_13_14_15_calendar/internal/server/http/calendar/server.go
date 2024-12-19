@@ -27,12 +27,12 @@ func NewServer(app *app.App, httpconf config.HTTPConf) *Server {
 }
 
 // Start starts the HTTP server.
-func (s *Server) Start(ctx context.Context) error {
+func (s *Server) Start(ctx context.Context, conf config.HTTPConf) error {
 	// Create a new HTTP server
 	s.server = &http.Server{
-		Addr:              ":" + s.httpconf.Port,
+		Addr:              conf.Host + ":" + s.httpconf.Port,
 		Handler:           s.routes(),
-		ReadTimeout:       5 * time.Second,
+		ReadTimeout:       time.Duration(conf.Timeout) * time.Second,
 		ReadHeaderTimeout: 2 * time.Second,
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       120 * time.Second,

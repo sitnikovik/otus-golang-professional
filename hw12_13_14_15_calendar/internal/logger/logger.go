@@ -13,7 +13,7 @@ func Debugf(format string, a ...interface{}) {
 // Debug logs the debug message
 func Debug(msg string) {
 	if level >= DebugLevel {
-		log(msg)
+		log(DebugLevel, msg)
 	}
 }
 
@@ -25,7 +25,7 @@ func Infof(format string, a ...interface{}) {
 // Info logs the info message
 func Info(msg string) {
 	if level >= InfoLevel {
-		log(msg)
+		log(InfoLevel, msg)
 	}
 }
 
@@ -37,7 +37,7 @@ func Noticef(format string, a ...interface{}) {
 // Notice logs the notice message
 func Notice(msg string) {
 	if level >= NoticeLevel {
-		log(msg)
+		log(NoticeLevel, msg)
 	}
 }
 
@@ -49,7 +49,7 @@ func Warningf(format string, a ...interface{}) {
 // Warning logs the warning message
 func Warning(msg string) {
 	if level >= WarningLevel {
-		log(msg)
+		log(WarningLevel, msg)
 	}
 }
 
@@ -60,9 +60,8 @@ func Errorf(format string, a ...interface{}) {
 
 // Error logs the error message
 func Error(msg string) {
-	fmt.Printf("log: %v\n", log)
 	if level >= ErrorLevel {
-		log(msg)
+		log(ErrorLevel, msg)
 	}
 }
 
@@ -74,7 +73,7 @@ func Alertf(format string, a ...interface{}) {
 // Alert logs the alert message
 func Alert(msg string) {
 	if level >= AlertLevel {
-		log(msg)
+		log(AlertLevel, msg)
 	}
 }
 
@@ -86,7 +85,7 @@ func Criticalf(format string, a ...interface{}) {
 // Critical logs the critical message
 func Critical(msg string) {
 	if level >= CriticalLevel {
-		log(msg)
+		log(CriticalLevel, msg)
 	}
 }
 
@@ -98,19 +97,14 @@ func Emergencyf(format string, a ...interface{}) {
 // Emergency logs the emergency message
 func Emergency(msg string) {
 	if level >= EmergencyLevel {
-		log(msg)
+		log(EmergencyLevel, msg)
 		panic(msg)
 	}
 }
 
 // log logs the message
-func log(msg string) {
+func log(lvl Level, msg string) {
 	// no using slog package cause of diffuculties with level setting
-	echo(msg)
-}
-
-// echo logs the message with the current time
-func echo(msg string) {
 	fmt.Printf("%s [%s]: %s\n", currTime(), level, msg)
 }
 

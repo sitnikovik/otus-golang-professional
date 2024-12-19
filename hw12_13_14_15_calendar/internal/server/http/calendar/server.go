@@ -33,6 +33,14 @@ func (s *Server) Start(ctx context.Context) error {
 		Addr:    ":" + s.httpconf.Port,
 		Handler: s.routes(),
 	}
+
+	// Recover from panics
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Emergencyf("recovered from panic: %v", r)
+		}
+	}()
+
 	// Run the server in a separate goroutine
 	go func() {
 		logger.Infof("Starting HTTP server on %s", s.server.Addr)

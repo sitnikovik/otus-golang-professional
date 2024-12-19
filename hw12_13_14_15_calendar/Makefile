@@ -21,7 +21,9 @@ build-img:
 	
 
 run-img: build-img
-	docker-compose up -d
+	docker-compose build --no-cache
+	docker-compose down
+	docker-compose up --build
 	docker run $(DOCKER_IMG)
 
 version: build

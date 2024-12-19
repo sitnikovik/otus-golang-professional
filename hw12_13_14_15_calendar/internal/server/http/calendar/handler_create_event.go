@@ -12,40 +12,21 @@ import (
 func (s *Server) handlerCreateEvent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
+		var err error
 
 		// Read the request body
-		reader, err := r.GetBody()
-		if err != nil {
+		defer r.Body.Close()
+		var v eventModel.Event
+		if err = json.NewDecoder(r.Body).Decode(&v); err != nil {
 			errorHandler(w,
-				fmt.Errorf("failed to get body: %v", err),
-				http.StatusInternalServerError,
-			)
-			return
-		}
-		defer reader.Close()
-		bb := make([]byte, 0, 1024)
-		_, err = reader.Read(bb)
-		if err != nil {
-			errorHandler(w,
-				fmt.Errorf("failed to read body: %v", err),
-				http.StatusInternalServerError,
-			)
-			return
-		}
-
-		// Unmarshal the request body to the event model
-		v := &eventModel.Event{}
-		err = json.Unmarshal(bb, v)
-		if err != nil {
-			errorHandler(w,
-				fmt.Errorf("failed to unmarshal body: %v", err),
-				http.StatusInternalServerError,
+				fmt.Errorf("failed to decode body: %v", err),
+				http.StatusBadRequest,
 			)
 			return
 		}
 
 		// Create the event
-		id, err := s.app.DI().EventService().CreateEvent(ctx, v)
+		id, err := s.app.DI().EventService().CreateEvent(ctx, &v)
 		if err != nil {
 			errorHandler(w,
 				fmt.Errorf("failed to  create event: %v", err),

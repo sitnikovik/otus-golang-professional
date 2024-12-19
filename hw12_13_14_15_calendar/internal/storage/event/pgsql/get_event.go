@@ -8,7 +8,7 @@ import (
 	eventModel "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/model/event"
 )
 
-// GetEvent returns the event by ID
+// GetEvent returns the event by ID.
 func (s *PgStorage) GetEvent(ctx context.Context, eventID uint64) (*eventModel.Event, error) {
 	filter := eventFilter.Filter{
 		IDs:   []uint64{eventID},

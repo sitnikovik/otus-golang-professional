@@ -9,9 +9,9 @@ import (
 type closerFunc = func(ctx context.Context) error
 
 var (
-	// mu is a mutex for the closers slice
+	// mu is a mutex for the closers slice.
 	mu sync.Mutex
-	// closers is a slice of closer functions
+	// closers is a slice of closer functions.
 	closers []closerFunc
 )
 

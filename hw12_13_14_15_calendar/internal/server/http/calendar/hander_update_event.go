@@ -8,11 +8,10 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-
 	eventModel "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/model/event"
 )
 
-// handlerUpdateEvent is the handler to update an event
+// handlerUpdateEvent is the handler to update an event.
 func (s *Server) handlerUpdateEvent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -34,7 +33,7 @@ func (s *Server) handlerUpdateEvent() http.HandlerFunc {
 		bb, err := io.ReadAll(r.Body)
 		if err != nil {
 			errorHandler(w,
-				fmt.Errorf("failed to read body: %v", err),
+				fmt.Errorf("failed to read body: %w", err),
 				http.StatusInternalServerError,
 			)
 			return
@@ -45,7 +44,7 @@ func (s *Server) handlerUpdateEvent() http.HandlerFunc {
 		err = json.Unmarshal(bb, &v)
 		if err != nil {
 			errorHandler(w,
-				fmt.Errorf("failed to unmarshal body: %v", err),
+				fmt.Errorf("failed to unmarshal body: %w", err),
 				http.StatusInternalServerError,
 			)
 			return
@@ -56,7 +55,7 @@ func (s *Server) handlerUpdateEvent() http.HandlerFunc {
 		err = s.app.DI().EventService().UpdateEvent(ctx, &v)
 		if err != nil {
 			errorHandler(w,
-				fmt.Errorf("failed to update event: %v", err),
+				fmt.Errorf("failed to update event: %w", err),
 				http.StatusInternalServerError,
 			)
 			return

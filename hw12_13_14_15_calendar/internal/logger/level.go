@@ -4,37 +4,37 @@ import (
 	"strings"
 )
 
-// Level defines the log level
+// Level defines the log level.
 type Level int
 
-// level is the current logging level
-var level Level = InfoLevel
+// level is the current logging level.
+var level = InfoLevel
 
-// SetLevel initializes the logger with the provided level
+// SetLevel initializes the logger with the provided level.
 func SetLevel(l Level) {
 	level = l
 }
 
 const (
-	// EmergencyLevel level is used for emergency messages
+	// EmergencyLevel level is used for emergency messages.
 	EmergencyLevel Level = iota
-	// AlertLevel level is used for alerts
+	// AlertLevel level is used for alerts.
 	AlertLevel
-	// CriticalLevel level is used for critical messages
+	// CriticalLevel level is used for critical messages.
 	CriticalLevel
-	// ErrorLevel level is used for errors
+	// ErrorLevel level is used for errors.
 	ErrorLevel
-	// WarningLevel level is used for warnings
+	// WarningLevel level is used for warnings.
 	WarningLevel
-	// NoticeLevel level is used for warnings
+	// NoticeLevel level is used for warnings.
 	NoticeLevel
-	// InfoLevel level is used for informational messages
+	// InfoLevel level is used for informational messages.
 	InfoLevel
-	// DebugLevel level is used for debugging purposes
+	// DebugLevel level is used for debugging purposes.
 	DebugLevel
 )
 
-// String returns the string representation of the log level
+// String returns the string representation of the log level.
 func (l Level) String() string {
 	switch l {
 	case EmergencyLevel:
@@ -58,7 +58,7 @@ func (l Level) String() string {
 	return ""
 }
 
-// LevelFromString returns the log level from the string
+// LevelFromString returns the log level from the string.
 func LevelFromString(level string) Level {
 	switch strings.ToLower(level) {
 	case "emergency":

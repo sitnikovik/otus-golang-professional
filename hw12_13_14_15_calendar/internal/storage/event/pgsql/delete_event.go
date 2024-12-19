@@ -6,8 +6,8 @@ import (
 	"github.com/Masterminds/squirrel"
 )
 
-// DeleteEvent deletes the event
-func (s *PgStorage) DeleteEvent(ctx context.Context, eventID uint64) error {
+// DeleteEvent deletes the event.
+func (s *PgStorage) DeleteEvent(_ context.Context, eventID uint64) error {
 	sb := squirrel.
 		Delete(eventsTable).
 		PlaceholderFormat(squirrel.Dollar).

@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// handlerGetEvent is the handler to get the event
+// handlerGetEvent is the handler to get the event.
 func (s *Server) handlerGetEvent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -42,7 +42,7 @@ func (s *Server) handlerGetEvent() http.HandlerFunc {
 		if err != nil {
 			errorHandler(
 				w,
-				fmt.Errorf("failed to marshal event: %v", err),
+				fmt.Errorf("failed to marshal event: %w", err),
 				http.StatusInternalServerError,
 			)
 			return

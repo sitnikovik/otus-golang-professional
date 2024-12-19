@@ -29,7 +29,7 @@ func (s *Server) handlerDeleteEvent() http.HandlerFunc {
 		if err != nil {
 			errorHandler(
 				w,
-				fmt.Errorf("failed to delete event: %v", err),
+				fmt.Errorf("failed to delete event: %w", err),
 				http.StatusInternalServerError,
 			)
 			return

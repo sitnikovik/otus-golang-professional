@@ -4,13 +4,11 @@ import (
 	"context"
 
 	"github.com/Masterminds/squirrel"
-
 	eventModel "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/model/event"
 )
 
-// CreateEvent creates a new event
+// CreateEvent creates a new event.
 func (s *PgStorage) CreateEvent(_ context.Context, event *eventModel.Event) (uint64, error) {
-
 	sb := squirrel.
 		Insert(eventsTable).
 		PlaceholderFormat(squirrel.Dollar).

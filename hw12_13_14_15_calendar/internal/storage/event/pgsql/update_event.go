@@ -4,11 +4,10 @@ import (
 	"context"
 
 	"github.com/Masterminds/squirrel"
-
 	eventModel "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/model/event"
 )
 
-// UpdateEvent updates the event
+// UpdateEvent updates the event.
 func (s *PgStorage) UpdateEvent(_ context.Context, event *eventModel.Event) error {
 	sb := squirrel.
 		Update(eventsTable).

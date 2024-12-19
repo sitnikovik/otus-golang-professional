@@ -9,7 +9,7 @@ import (
 	eventModel "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/model/event"
 )
 
-// handlerGetEvent is the handler to create the event
+// handlerGetEvent is the handler to create the event.
 func (s *Server) handlerCreateEvent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -20,7 +20,7 @@ func (s *Server) handlerCreateEvent() http.HandlerFunc {
 		bb, err := io.ReadAll(r.Body)
 		if err != nil {
 			errorHandler(w,
-				fmt.Errorf("failed to read body: %v", err),
+				fmt.Errorf("failed to read body: %w", err),
 				http.StatusInternalServerError,
 			)
 			return
@@ -31,7 +31,7 @@ func (s *Server) handlerCreateEvent() http.HandlerFunc {
 		err = json.Unmarshal(bb, &v)
 		if err != nil {
 			errorHandler(w,
-				fmt.Errorf("failed to unmarshal body: %v", err),
+				fmt.Errorf("failed to unmarshal body: %w", err),
 				http.StatusInternalServerError,
 			)
 			return
@@ -41,7 +41,7 @@ func (s *Server) handlerCreateEvent() http.HandlerFunc {
 		id, err := s.app.DI().EventService().CreateEvent(ctx, &v)
 		if err != nil {
 			errorHandler(w,
-				fmt.Errorf("failed to  create event: %v", err),
+				fmt.Errorf("failed to  create event: %w", err),
 				http.StatusInternalServerError,
 			)
 			return

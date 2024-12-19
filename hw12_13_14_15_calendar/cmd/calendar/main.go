@@ -82,7 +82,7 @@ func main() {
 		if err := server.Start(ctx); err != nil {
 			logger.Errorf("failed to start http server: %v", err)
 			cancel()
-			os.Exit(1) //nolint:gocritic
+			os.Exit(1)
 		}
 	}()
 	wg.Wait()

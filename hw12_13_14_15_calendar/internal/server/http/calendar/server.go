@@ -11,14 +11,14 @@ import (
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
 )
 
-// Server is the HTTP server
+// Server is the HTTP server.
 type Server struct {
 	app      *app.App
 	httpconf config.HTTPConf
 	server   *http.Server
 }
 
-// NewServer creates a new HTTP server
+// NewServer creates a new HTTP server.
 func NewServer(app *app.App, httpconf config.HTTPConf) *Server {
 	return &Server{
 		app:      app,
@@ -26,12 +26,16 @@ func NewServer(app *app.App, httpconf config.HTTPConf) *Server {
 	}
 }
 
-// Start starts the HTTP server
+// Start starts the HTTP server.
 func (s *Server) Start(ctx context.Context) error {
 	// Create a new HTTP server
 	s.server = &http.Server{
-		Addr:    ":" + s.httpconf.Port,
-		Handler: s.routes(),
+		Addr:              ":" + s.httpconf.Port,
+		Handler:           s.routes(),
+		ReadTimeout:       5 * time.Second,
+		ReadHeaderTimeout: 2 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
 
 	// Recover from panics
@@ -59,12 +63,12 @@ func (s *Server) Start(ctx context.Context) error {
 	return s.server.Shutdown(ctxShutDown)
 }
 
-// Stop stops the HTTP server
+// Stop stops the HTTP server.
 func (s *Server) Stop(ctx context.Context) error {
 	return s.server.Shutdown(ctx)
 }
 
-// errorHandler is the handler to handle errors
+// errorHandler is the handler to handle errors.
 func errorHandler(w http.ResponseWriter, err error, httpCode int) {
 	logger.Error(err.Error())
 	http.Error(w, err.Error(), httpCode)

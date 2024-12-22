@@ -33,10 +33,10 @@ test:
 	go test -race ./internal/... ./pkg/...
 
 install-lint-deps:
-	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.57.2
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 lint: install-lint-deps
-	golangci-lint run ./...
+	golangci-lint run --config=.golangci.yml
 
 .PHONY: build run build-img run-img version test lint
 

@@ -4,12 +4,21 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http/middleware"
 )
 
 // routes defines the routes of the HTTP server.
 func (s *Server) routes() http.Handler {
 	mux := mux.NewRouter()
+
+	// Hello page
+	mux.HandleFunc(
+		"/hello",
+		middleware.LoggingMiddleware(
+			s.handlerHello(),
+		),
+	).Methods(http.MethodGet)
 
 	// Create a new event
 	mux.HandleFunc(

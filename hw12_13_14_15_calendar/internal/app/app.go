@@ -1,26 +1,16 @@
 package app
 
-import (
-	"context"
-)
-
-type App struct { // TODO
+type App struct {
+	di *DIContainer
 }
 
-type Logger interface { // TODO
+// New creates and returns the app instance.
+func New(di *DIContainer) *App {
+	return &App{
+		di: di,
+	}
 }
 
-type Storage interface { // TODO
+func (a *App) DI() *DIContainer {
+	return a.di
 }
-
-func New(logger Logger, storage Storage) *App {
-	return &App{}
-}
-
-func (a *App) CreateEvent(ctx context.Context, id, title string) error {
-	// TODO
-	return nil
-	// return a.storage.CreateEvent(storage.Event{ID: id, Title: title})
-}
-
-// TODO

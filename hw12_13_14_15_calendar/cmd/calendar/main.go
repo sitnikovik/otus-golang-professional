@@ -5,57 +5,85 @@ import (
 	"flag"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
+	calendarHttpServer "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http/calendar"
 )
 
-var configFile string
+var configPath string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+	flag.StringVar(
+		&configPath,
+		"config",
+		".env",
+		"Path to configuration file",
+	)
 }
 
 func main() {
+	// Cmd parsing
 	flag.Parse()
-
 	if flag.Arg(0) == "version" {
 		printVersion()
 		return
 	}
 
-	config := NewConfig()
-	logg := logger.New(config.Logger.Level)
+	// Configuration init
+	config, err := config.NewConfig(configPath)
+	if err != nil {
+		logger.Emergencyf("failed to load config: %v", err)
+	}
+	logger.Debugf("Used config file: %s", configPath)
 
-	storage := memorystorage.New()
-	calendar := app.New(logg, storage)
+	configLevel := config.Logger.Level
+	logger.SetLevel(logger.LevelFromString(configLevel))
+	logger.Debugf("Specified log level: %s", configLevel)
 
-	server := internalhttp.NewServer(logg, calendar)
+	// App init
+	// di := depinjection.NewDIContainer(config)
+	calendarApp := app.New(
+		app.NewDIContainer(config),
+	)
 
-	ctx, cancel := signal.NotifyContext(context.Background(),
-		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	// Servers
+	server := calendarHttpServer.NewServer(calendarApp, config.HTTP)
+
+	// Run the app
+	ctx, cancel := signal.NotifyContext(
+		context.Background(),
+		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP,
+	)
 	defer cancel()
 
+	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
+		// Graceful shutdown
+		defer wg.Done()
 		<-ctx.Done()
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 		defer cancel()
 
 		if err := server.Stop(ctx); err != nil {
-			logg.Error("failed to stop http server: " + err.Error())
+			logger.Criticalf("failed to stop http server: %v", err)
 		}
 	}()
-
-	logg.Info("calendar is running...")
-
-	if err := server.Start(ctx); err != nil {
-		logg.Error("failed to start http server: " + err.Error())
-		cancel()
-		os.Exit(1) //nolint:gocritic
-	}
+	// Start the server
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if err := server.Start(ctx, config.HTTP); err != nil {
+			logger.Errorf("failed to start http server: %v", err)
+			cancel()
+			os.Exit(1)
+		}
+	}()
+	wg.Wait()
 }

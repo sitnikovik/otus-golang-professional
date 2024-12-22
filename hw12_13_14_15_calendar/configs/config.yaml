@@ -1,0 +1,5 @@
+logger:
+  level: "INFO"
+http:
+  port: 8080
+  timeout: 10

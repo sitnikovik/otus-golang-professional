@@ -1,0 +1,88 @@
+run:
+  tests: true
+  build-tags:
+    - bench
+    - !bench
+
+issues:
+  exclude-dirs:
+    - "vendor/*"  # Исключает директорию vendor в любом месте
+    - "internal/*"  # Исключает директорию internal
+    - "examples/*"  # Исключает директорию examples
+    - "scripts/*"  # Исключает директорию scripts
+    - "tmp/*"  # Исключает временные файлы и папки
+  exclude-files:
+    - ".*_test.go"  # Исключает все тестовые файлы
+    - ".*_mock.go"  # Исключает все mock-файлы
+  exclude-rules:
+    - path: ".*_test\\.go"
+      linters:
+        - errcheck
+        - dupl
+        - gocyclo
+        - gosec
+    - path: ".*_mock\\.go"
+      linters:
+        - all
+
+linters-settings:
+  funlen:
+    lines: 150
+    statements: 80
+  depguard:
+    rules:
+      main:
+        list-mode: lax
+        files:
+          - $all
+        allow:
+          - $gostd
+          - github.com/stretchr/testify
+
+linters:
+  disable-all: true
+  enable:
+    - asciicheck
+    - depguard
+    - dogsled
+    - dupl
+    - bodyclose
+    - durationcheck
+    - errorlint
+    - exhaustive
+    - copyloopvar
+    - funlen
+    - gci
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - gofmt
+    - gofumpt
+    - goheader
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - importas
+    - ineffassign
+    - lll
+    - makezero
+    - misspell
+    - nestif
+    - nilerr
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - revive
+    - staticcheck
+    - stylecheck
+    - tagliatelle
+    - thelper
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace

@@ -3,11 +3,14 @@ package main
 import (
 	"context"
 	"flag"
+	"net"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
+
+	"google.golang.org/grpc"
 
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
@@ -52,7 +55,8 @@ func main() {
 	)
 
 	// Servers
-	server := calendarHttpServer.NewServer(calendarApp, config.HTTP)
+	httpServer := calendarHttpServer.NewServer(calendarApp, config.HTTP)
+	grpcServer := grpc.NewServer()
 
 	// Run the app
 	ctx, cancel := signal.NotifyContext(
@@ -71,7 +75,9 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 		defer cancel()
 
-		if err := server.Stop(ctx); err != nil {
+		grpcServer.GracefulStop()
+
+		if err := httpServer.Stop(ctx); err != nil {
 			logger.Criticalf("failed to stop http server: %v", err)
 		}
 	}()
@@ -79,8 +85,29 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := server.Start(ctx, config.HTTP); err != nil {
+		// Start http server
+		if err := httpServer.Start(ctx, config.HTTP); err != nil {
 			logger.Errorf("failed to start http server: %v", err)
+			cancel()
+			os.Exit(1)
+		}
+
+	}()
+	// Start the gRPC server
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		// Start gRPC server
+		address := config.GRPC.Host + ":" + config.GRPC.Port
+		logger.Infof("Starting gRPC server on %s", address)
+		grpcLis, err := net.Listen("tcp", address)
+		if err != nil {
+			logger.Errorf("failed to listen gRPC server: %v", err)
+			cancel()
+			os.Exit(1)
+		}
+		if err = grpcServer.Serve(grpcLis); err != nil {
+			logger.Errorf("failed to serve gRPC server: %v", err)
 			cancel()
 			os.Exit(1)
 		}

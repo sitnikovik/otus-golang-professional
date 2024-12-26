@@ -1,0 +1,150 @@
+syntax = "proto3";
+
+package event;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package="github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/pkg/v1/event;event_v1";
+
+// EventService is a service for managing calendar events.
+service EventService {
+    // CreateEvent creates a new event.
+    rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+    // UpdateEvent updates an existing event.
+    rpc UpdateEvent(UpdateEventRequest) returns (UpdateEventResponse);
+    // UpdateEventNotify updates the event notification.
+    rpc UpdateEventNotify(UpdateEventNotifyRequest) returns (UpdateEventNotifyResponse);
+    // DeleteEvent deletes an existing event.
+    rpc DeleteEvent(DeleteEventRequest) returns (DeleteEventResponse);
+    // GetEvent returns an event by its ID.
+    rpc GetEvent(GetEventRequest) returns (GetEventResponse);
+    // GetEvents returns a list of events.
+    rpc GetEvents(GetEventsRequest) returns (GetEventsResponse);
+    // GetEventsUpTo returns a list of events up to the specified date.
+    rpc GetEventsUpTo(GetEventsUpToRequest) returns (GetEventsResponse);
+}
+
+// Event is a representation of a calendar event
+message Event {
+    // Unique identifier of the event.
+    uint64 id = 1;
+    // Name of the event.
+    string title = 2;
+    // Time when the event starts.
+    google.protobuf.Timestamp created_at = 3;
+    // Time when the event ends.
+    google.protobuf.Timestamp finished_at = 4;
+    // Description of the event.
+    string description = 5;
+    // Owner of the event.
+    uint64 owner_id = 6;
+    // Duration before the event to notify the owner.
+    int64 notify_before = 7;
+}
+
+// CreateEventResponse is a response for the CreateEvent request.
+message CreateEventRequest {
+    // Name of the event.
+    string title = 1;
+    // Time when the event ends.
+    google.protobuf.Timestamp finished_at = 2;
+    // Description of the event.
+    string description = 3;
+    // Owner of the event.
+    uint64 owner_id = 4;
+    // Duration before the event to notify the owner.
+    int64 notify_before = 5;
+}
+
+// CreateEventResponse is a response for the CreateEvent request.
+message CreateEventResponse {
+    // Unique identifier of the event.
+    uint64 id = 1;
+}
+
+// UpdateEventRequest is a request for the UpdateEvent request.
+message UpdateEventRequest {
+    // Unique identifier of the event.
+    Event event = 1;
+}
+
+// UpdateEventResponse is a response for the UpdateEvent request.
+message UpdateEventResponse {
+    // Empty response.
+}
+
+// UpdateEventNotifyRequest is a request for the UpdateEventNotify request.
+message UpdateEventNotifyRequest {
+    // Unique identifier of the event.
+    uint64 id = 1;
+    // Duration before the event to notify the owner.
+    int64 notify_before = 2;
+}
+
+// UpdateEventNotifyResponse is a response for the UpdateEventNotify request.
+message UpdateEventNotifyResponse {
+    // Empty response.
+}
+
+// DeleteEventRequest is a request for the DeleteEvent request.
+message DeleteEventRequest {
+    // Unique identifier of the event.
+    uint64 id = 1;
+}
+
+// DeleteEventResponse is a response for the DeleteEvent request.
+message DeleteEventResponse {
+    // Empty response.
+}
+
+// GetEventRequest is a request for the GetEvent request.
+message GetEventRequest {
+    // Unique identifier of the event.
+    uint64 id = 1;
+}
+
+// GetEventResponse is a response for the GetEvent request.
+message GetEventResponse {
+    // Event.
+    Event event = 1;
+}
+
+// GetEventsRequest is a request for the GetEvents request.
+message GetEventsRequest {
+    // List of unique identifiers of the events.
+    repeated uint64 ids = 1;
+    // Time when the event starts from.
+    google.protobuf.Timestamp created_from = 2;
+    // Time when the event starts to.
+    google.protobuf.Timestamp created_to = 3;
+    // Time when the event ends from.
+    google.protobuf.Timestamp finished_from = 4;
+    // Time when the event ends to.
+    google.protobuf.Timestamp finished_to = 5;
+    // Owner of the event.
+    uint64 owner_id = 6;
+    // Duration before the event to notify the owner from.
+    int64 notify_before_from = 7;
+    // Duration before the event to notify the owner to.
+    int64 notify_before_to = 8;
+    // Limit of the events.
+    uint64 limit = 9;
+    // Offset of the events.
+    uint64 offset = 10;
+}
+
+// GetEventsResponse is a response for the GetEvents request.
+message GetEventsResponse {
+    // List of events.
+    repeated Event events = 1;
+    // Total count of the events.
+    uint64 total = 2;
+}
+
+// GetEventsUpToRequest is a request for the GetEventsUpTo request.
+message GetEventsUpToRequest {
+    // Time when the event ends to.
+    google.protobuf.Timestamp finished_to = 1;
+    // Limit of the events.
+    uint64 limit = 2;
+}

@@ -34,8 +34,14 @@ type EventServiceClient interface {
 	GetEvent(ctx context.Context, in *GetEventRequest, opts ...grpc.CallOption) (*GetEventResponse, error)
 	// GetEvents returns a list of events.
 	GetEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
-	// GetEventsUpTo returns a list of events up to the specified date.
-	GetEventsUpTo(ctx context.Context, in *GetEventsUpToRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
+	// GetEventsBeforeDays returns a list of events before days to notify the owner.
+	GetEventsBeforeDays(ctx context.Context, in *GetEventsBeforeDaysRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
+	// GetEventsForToday returns a list of events for today.
+	GetEventsForToday(ctx context.Context, in *GetEventsForTodayRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
+	// GetEventsForWeek returns a list of events for the week.
+	GetEventsForWeek(ctx context.Context, in *GetEventsForWeekRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
+	// GetEventsForMonth returns a list of events for the month.
+	GetEventsForMonth(ctx context.Context, in *GetEventsForMonthRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
 }
 
 type eventServiceClient struct {
@@ -100,9 +106,36 @@ func (c *eventServiceClient) GetEvents(ctx context.Context, in *GetEventsRequest
 	return out, nil
 }
 
-func (c *eventServiceClient) GetEventsUpTo(ctx context.Context, in *GetEventsUpToRequest, opts ...grpc.CallOption) (*GetEventsResponse, error) {
+func (c *eventServiceClient) GetEventsBeforeDays(ctx context.Context, in *GetEventsBeforeDaysRequest, opts ...grpc.CallOption) (*GetEventsResponse, error) {
 	out := new(GetEventsResponse)
-	err := c.cc.Invoke(ctx, "/event.EventService/GetEventsUpTo", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/event.EventService/GetEventsBeforeDays", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *eventServiceClient) GetEventsForToday(ctx context.Context, in *GetEventsForTodayRequest, opts ...grpc.CallOption) (*GetEventsResponse, error) {
+	out := new(GetEventsResponse)
+	err := c.cc.Invoke(ctx, "/event.EventService/GetEventsForToday", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *eventServiceClient) GetEventsForWeek(ctx context.Context, in *GetEventsForWeekRequest, opts ...grpc.CallOption) (*GetEventsResponse, error) {
+	out := new(GetEventsResponse)
+	err := c.cc.Invoke(ctx, "/event.EventService/GetEventsForWeek", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *eventServiceClient) GetEventsForMonth(ctx context.Context, in *GetEventsForMonthRequest, opts ...grpc.CallOption) (*GetEventsResponse, error) {
+	out := new(GetEventsResponse)
+	err := c.cc.Invoke(ctx, "/event.EventService/GetEventsForMonth", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -125,8 +158,14 @@ type EventServiceServer interface {
 	GetEvent(context.Context, *GetEventRequest) (*GetEventResponse, error)
 	// GetEvents returns a list of events.
 	GetEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error)
-	// GetEventsUpTo returns a list of events up to the specified date.
-	GetEventsUpTo(context.Context, *GetEventsUpToRequest) (*GetEventsResponse, error)
+	// GetEventsBeforeDays returns a list of events before days to notify the owner.
+	GetEventsBeforeDays(context.Context, *GetEventsBeforeDaysRequest) (*GetEventsResponse, error)
+	// GetEventsForToday returns a list of events for today.
+	GetEventsForToday(context.Context, *GetEventsForTodayRequest) (*GetEventsResponse, error)
+	// GetEventsForWeek returns a list of events for the week.
+	GetEventsForWeek(context.Context, *GetEventsForWeekRequest) (*GetEventsResponse, error)
+	// GetEventsForMonth returns a list of events for the month.
+	GetEventsForMonth(context.Context, *GetEventsForMonthRequest) (*GetEventsResponse, error)
 	mustEmbedUnimplementedEventServiceServer()
 }
 
@@ -152,8 +191,17 @@ func (UnimplementedEventServiceServer) GetEvent(context.Context, *GetEventReques
 func (UnimplementedEventServiceServer) GetEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetEvents not implemented")
 }
-func (UnimplementedEventServiceServer) GetEventsUpTo(context.Context, *GetEventsUpToRequest) (*GetEventsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetEventsUpTo not implemented")
+func (UnimplementedEventServiceServer) GetEventsBeforeDays(context.Context, *GetEventsBeforeDaysRequest) (*GetEventsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEventsBeforeDays not implemented")
+}
+func (UnimplementedEventServiceServer) GetEventsForToday(context.Context, *GetEventsForTodayRequest) (*GetEventsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEventsForToday not implemented")
+}
+func (UnimplementedEventServiceServer) GetEventsForWeek(context.Context, *GetEventsForWeekRequest) (*GetEventsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEventsForWeek not implemented")
+}
+func (UnimplementedEventServiceServer) GetEventsForMonth(context.Context, *GetEventsForMonthRequest) (*GetEventsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEventsForMonth not implemented")
 }
 func (UnimplementedEventServiceServer) mustEmbedUnimplementedEventServiceServer() {}
 
@@ -276,20 +324,74 @@ func _EventService_GetEvents_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EventService_GetEventsUpTo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetEventsUpToRequest)
+func _EventService_GetEventsBeforeDays_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEventsBeforeDaysRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EventServiceServer).GetEventsUpTo(ctx, in)
+		return srv.(EventServiceServer).GetEventsBeforeDays(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/event.EventService/GetEventsUpTo",
+		FullMethod: "/event.EventService/GetEventsBeforeDays",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EventServiceServer).GetEventsUpTo(ctx, req.(*GetEventsUpToRequest))
+		return srv.(EventServiceServer).GetEventsBeforeDays(ctx, req.(*GetEventsBeforeDaysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EventService_GetEventsForToday_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEventsForTodayRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServiceServer).GetEventsForToday(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/event.EventService/GetEventsForToday",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServiceServer).GetEventsForToday(ctx, req.(*GetEventsForTodayRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EventService_GetEventsForWeek_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEventsForWeekRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServiceServer).GetEventsForWeek(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/event.EventService/GetEventsForWeek",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServiceServer).GetEventsForWeek(ctx, req.(*GetEventsForWeekRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EventService_GetEventsForMonth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetEventsForMonthRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServiceServer).GetEventsForMonth(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/event.EventService/GetEventsForMonth",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServiceServer).GetEventsForMonth(ctx, req.(*GetEventsForMonthRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -326,8 +428,20 @@ var EventService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _EventService_GetEvents_Handler,
 		},
 		{
-			MethodName: "GetEventsUpTo",
-			Handler:    _EventService_GetEventsUpTo_Handler,
+			MethodName: "GetEventsBeforeDays",
+			Handler:    _EventService_GetEventsBeforeDays_Handler,
+		},
+		{
+			MethodName: "GetEventsForToday",
+			Handler:    _EventService_GetEventsForToday_Handler,
+		},
+		{
+			MethodName: "GetEventsForWeek",
+			Handler:    _EventService_GetEventsForWeek_Handler,
+		},
+		{
+			MethodName: "GetEventsForMonth",
+			Handler:    _EventService_GetEventsForMonth_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

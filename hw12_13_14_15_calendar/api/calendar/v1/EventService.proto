@@ -20,8 +20,14 @@ service EventService {
     rpc GetEvent(GetEventRequest) returns (GetEventResponse);
     // GetEvents returns a list of events.
     rpc GetEvents(GetEventsRequest) returns (GetEventsResponse);
-    // GetEventsUpTo returns a list of events up to the specified date.
-    rpc GetEventsUpTo(GetEventsUpToRequest) returns (GetEventsResponse);
+    // GetEventsBeforeDays returns a list of events before days to notify the owner.
+    rpc GetEventsBeforeDays(GetEventsBeforeDaysRequest) returns (GetEventsResponse);
+    // GetEventsForToday returns a list of events for today.
+    rpc GetEventsForToday(GetEventsForTodayRequest) returns (GetEventsResponse);
+    // GetEventsForWeek returns a list of events for the week.
+    rpc GetEventsForWeek(GetEventsForWeekRequest) returns (GetEventsResponse);
+    // GetEventsForMonth returns a list of events for the month.
+    rpc GetEventsForMonth(GetEventsForMonthRequest) returns (GetEventsResponse);
 }
 
 // Event is a representation of a calendar event
@@ -123,10 +129,6 @@ message GetEventsRequest {
     google.protobuf.Timestamp finished_to = 5;
     // Owner of the event.
     uint64 owner_id = 6;
-    // Duration before the event to notify the owner from.
-    int64 notify_before_from = 7;
-    // Duration before the event to notify the owner to.
-    int64 notify_before_to = 8;
     // Limit of the events.
     uint64 limit = 9;
     // Offset of the events.
@@ -141,10 +143,25 @@ message GetEventsResponse {
     uint64 total = 2;
 }
 
-// GetEventsUpToRequest is a request for the GetEventsUpTo request.
-message GetEventsUpToRequest {
-    // Time when the event ends to.
-    google.protobuf.Timestamp finished_to = 1;
+// GetEventsBeforeDays is a request for the GetEventsBeforeDays request.
+message GetEventsBeforeDaysRequest {
     // Limit of the events.
-    uint64 limit = 2;
+    uint64 limit = 1;
+    // Days before the event to notify the owner.
+    uint32 days = 2;
+}
+
+// GetEventsForToday is a request for the GetEventsForToday request.
+message GetEventsForTodayRequest {
+    // Empty request.
+}
+
+// GetEventsForWeek is a request for the GetEventsForWeek request.
+message GetEventsForWeekRequest {
+    // Empty request.
+}
+
+// GetEventsForMonth is a request for the GetEventsForMonth request.
+message GetEventsForMonthRequest {
+    // Empty request.
 }

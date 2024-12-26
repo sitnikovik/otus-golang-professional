@@ -22,6 +22,8 @@ type Config struct {
 	PG PGConf `yaml:"pg"`
 	// HTTP describes the HTTP server configuration.
 	HTTP HTTPConf `yaml:"http"`
+	// GRPC describes the GRPC server configuration.
+	GRPC GRPCConf `yaml:"grpc"`
 }
 
 // LoggerConf describes the logging configuration.
@@ -63,6 +65,14 @@ type HTTPConf struct {
 	Timeout int `yaml:"timeout"`
 }
 
+// GRPCConf describes the GRPC server configuration.
+type GRPCConf struct {
+	// Host describes the GRPC server host.
+	Host string `yaml:"host"`
+	// Port describes the GRPC server port.
+	Port string `yaml:"port"`
+}
+
 // NewConfig creates and returns the new configuration.
 func NewConfig(pathToFile string) (Config, error) {
 	if err := godotenv.Load(pathToFile); err != nil {
@@ -86,6 +96,9 @@ func NewConfig(pathToFile string) (Config, error) {
 	cfg.HTTP.Port = getEnv("HTTP_PORT")
 	ttl, _ := strconv.Atoi(getEnv("HTTP_TIMEOUT"))
 	cfg.HTTP.Timeout = ttl
+
+	cfg.GRPC.Port = getEnv("GRPC_PORT")
+	cfg.GRPC.Host = getEnv("GRPC_HOST")
 
 	return cfg, nil
 }

@@ -102,6 +102,19 @@ func Emergency(msg string) {
 	}
 }
 
+// Panicf wraps the the emergency log with formatted message and panics.
+func Panicf(format string, a ...interface{}) {
+	Panic(fmt.Sprintf(format, a...))
+}
+
+// Panic wraps the the emergency log and panics.
+func Panic(msg string) {
+	if level >= EmergencyLevel {
+		log(EmergencyLevel, msg)
+		panic(msg)
+	}
+}
+
 // log logs the message.
 func log(lvl Level, msg string) {
 	// no using slog package cause of difficulties with level setting.

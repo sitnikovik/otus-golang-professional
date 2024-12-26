@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/jackc/pgx"
+
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
 	eventFilter "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/filter/event"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
@@ -72,7 +73,7 @@ func (d *DIContainer) pg() *pgx.ConnPool {
 			},
 		})
 		if err != nil {
-			logger.Emergencyf("failed to connect to postgres: %v", err)
+			logger.Panicf("failed to connect to postgres: %v", err)
 		}
 		d.pgx = pgx
 	}

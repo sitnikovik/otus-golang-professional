@@ -1,4 +1,4 @@
-package calendar
+package http
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ func (s *Server) handlerGetEvents() http.HandlerFunc {
 		ctx := r.Context()
 
 		// Get the events
-		events, err := s.app.DI().EventService().GetEvents(ctx, parseFilter(r))
+		events, err := s.eventService.GetEvents(ctx, parseFilter(r))
 		if err != nil {
 			errorHandler(
 				w,

@@ -1,11 +1,11 @@
-package calendar
+package http
 
 import (
 	"net/http"
 
 	"github.com/gorilla/mux"
 
-	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/server/http/middleware"
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/api/calendar/v1/http/middleware"
 )
 
 // routes defines the routes of the HTTP server.

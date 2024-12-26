@@ -1,19 +1,33 @@
-package calendar
+package http
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 
 	eventModel "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/model/event"
 )
 
-// handlerGetEvent is the handler to create the event.
-func (s *Server) handlerCreateEvent() http.HandlerFunc {
+// handlerUpdateEvent is the handler to update an event.
+func (s *Server) handlerUpdateEvent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		var err error
+
+		// Get the event ID from URI path param
+		vars := mux.Vars(r)
+		id, _ := strconv.Atoi(vars["id"])
+		if id <= 0 {
+			errorHandler(
+				w,
+				fmt.Errorf("event ID is empty or invalid"),
+				http.StatusBadRequest,
+			)
+			return
+		}
 
 		// Read the request body
 		defer r.Body.Close()
@@ -36,19 +50,20 @@ func (s *Server) handlerCreateEvent() http.HandlerFunc {
 			)
 			return
 		}
+		v.ID = uint64(id)
 
-		// Create the event
-		id, err := s.app.DI().EventService().CreateEvent(ctx, &v)
+		// Update the event
+		err = s.eventService.UpdateEvent(ctx, &v)
 		if err != nil {
 			errorHandler(w,
-				fmt.Errorf("failed to  create event: %w", err),
+				fmt.Errorf("failed to update event: %w", err),
 				http.StatusInternalServerError,
 			)
 			return
 		}
 
 		// Write response
-		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte(`{"id": "` + fmt.Sprint(id) + `"}`))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(""))
 	}
 }

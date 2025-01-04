@@ -1,26 +1,26 @@
 //go:build integration
 // +build integration
 
-package event
+package pgsql
 
 import (
 	"context"
 	"strconv"
 	"testing"
 
+	"github.com/jackc/pgx"
 	"github.com/stretchr/testify/require"
 
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/connections/pg"
 	eventModel "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/model/event"
-	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/event/pgsql"
 )
 
-func TestIntegrationService_CreateEvent(t *testing.T) {
+func TestIntegrationPgStorage_CreateEvent(t *testing.T) {
 	t.Parallel()
 
 	type fields struct {
-		dbMockFunc func(t *testing.T) eventDB
+		dbMockFunc func(t *testing.T) *pgx.ConnPool
 	}
 	type args struct {
 		ctx   context.Context
@@ -30,12 +30,13 @@ func TestIntegrationService_CreateEvent(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
+		want    uint64
 		wantErr bool
 	}{
 		{
 			name: "ok",
 			fields: fields{
-				dbMockFunc: func(t *testing.T) eventDB {
+				dbMockFunc: func(t *testing.T) *pgx.ConnPool {
 					cfg, err := config.NewTestConfig()
 					if err != nil {
 						t.Fatalf("failed to create test config: %v", err)
@@ -47,7 +48,7 @@ func TestIntegrationService_CreateEvent(t *testing.T) {
 						t.Fatalf("failed to create pg conn pool: %v", err)
 					}
 
-					return pgsql.New(conn)
+					return conn
 				},
 			},
 			args: args{
@@ -64,7 +65,7 @@ func TestIntegrationService_CreateEvent(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			s := &Service{
+			s := &PgStorage{
 				db: tt.fields.dbMockFunc(t),
 			}
 			got, err := s.CreateEvent(tt.args.ctx, tt.args.event)

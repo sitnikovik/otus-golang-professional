@@ -51,7 +51,7 @@ func EndOfMonth(t time.Time) time.Time {
 	return lastMomentCurrentMonth
 }
 
-// UpToDays returns the time at the end of the given year.
+// UpToDays returns the time at the end of the given day.
 func UpToDays(t time.Time, days int) time.Time {
 	toTime := t.AddDate(0, 0, days)
 	// set time to 00:00:00

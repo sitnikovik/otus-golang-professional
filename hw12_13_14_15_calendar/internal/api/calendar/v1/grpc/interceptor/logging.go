@@ -9,8 +9,8 @@ import (
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
 )
 
-// LoggingInterceptor is a unary interceptor for logging requests.
-func LoggingInterceptor(
+// Logging is a unary interceptor for logging requests.
+func Logging(
 	ctx context.Context,
 	req interface{},
 	info *grpc.UnaryServerInfo,

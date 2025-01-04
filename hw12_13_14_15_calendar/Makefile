@@ -15,6 +15,9 @@ install-lint-deps:
 lint: install-lint-deps
 	golangci-lint run --config=.golangci.yml
 
+.PHONY: test
+test: unit-test
+
 .PHONY: unit-test
 unit-test:
 	@echo "Running unit tests..."

@@ -73,6 +73,7 @@ func TestImplementation_GetEvents(t *testing.T) {
 						CreatedAt: ToGRPCTime(now),
 					},
 				},
+				Total: 2,
 			},
 		},
 		{

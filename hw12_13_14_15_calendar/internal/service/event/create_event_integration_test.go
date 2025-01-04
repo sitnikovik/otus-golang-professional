@@ -16,7 +16,7 @@ import (
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/storage/event/pgsql"
 )
 
-func TestService_CreateEvent(t *testing.T) {
+func TestIntegrationService_CreateEvent(t *testing.T) {
 	t.Parallel()
 
 	type fields struct {
@@ -27,11 +27,10 @@ func TestService_CreateEvent(t *testing.T) {
 		event *eventModel.Event
 	}
 	tests := []struct {
-		name     string
-		fields   fields
-		args     args
-		wantZero bool
-		wantErr  bool
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
 	}{
 		{
 			name: "ok",
@@ -71,6 +70,10 @@ func TestService_CreateEvent(t *testing.T) {
 			got, err := s.CreateEvent(tt.args.ctx, tt.args.event)
 
 			require.Equalf(t, tt.wantErr, err != nil, "unexpected error: %v", err)
+			if tt.wantErr {
+				require.Zerof(t, got, "expected zero result but got \"%d\"", got)
+				return
+			}
 			require.NotZerof(t, got, "unexpected result: got \"%d\" but want not zero", got)
 		})
 	}

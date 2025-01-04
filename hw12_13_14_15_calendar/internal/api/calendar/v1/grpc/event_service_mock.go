@@ -246,6 +246,239 @@ func (_c *MockeventService_GetEvents_Call) RunAndReturn(run func(context.Context
 	return _c
 }
 
+// GetEventsBeforeDays provides a mock function with given fields: ctx, days
+func (_m *MockeventService) GetEventsBeforeDays(ctx context.Context, days uint32) ([]*event.Event, error) {
+	ret := _m.Called(ctx, days)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetEventsBeforeDays")
+	}
+
+	var r0 []*event.Event
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) ([]*event.Event, error)); ok {
+		return rf(ctx, days)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) []*event.Event); ok {
+		r0 = rf(ctx, days)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*event.Event)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
+		r1 = rf(ctx, days)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockeventService_GetEventsBeforeDays_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetEventsBeforeDays'
+type MockeventService_GetEventsBeforeDays_Call struct {
+	*mock.Call
+}
+
+// GetEventsBeforeDays is a helper method to define mock.On call
+//   - ctx context.Context
+//   - days uint32
+func (_e *MockeventService_Expecter) GetEventsBeforeDays(ctx interface{}, days interface{}) *MockeventService_GetEventsBeforeDays_Call {
+	return &MockeventService_GetEventsBeforeDays_Call{Call: _e.mock.On("GetEventsBeforeDays", ctx, days)}
+}
+
+func (_c *MockeventService_GetEventsBeforeDays_Call) Run(run func(ctx context.Context, days uint32)) *MockeventService_GetEventsBeforeDays_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uint32))
+	})
+	return _c
+}
+
+func (_c *MockeventService_GetEventsBeforeDays_Call) Return(_a0 []*event.Event, _a1 error) *MockeventService_GetEventsBeforeDays_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockeventService_GetEventsBeforeDays_Call) RunAndReturn(run func(context.Context, uint32) ([]*event.Event, error)) *MockeventService_GetEventsBeforeDays_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetEventsForMonth provides a mock function with given fields: ctx
+func (_m *MockeventService) GetEventsForMonth(ctx context.Context) ([]*event.Event, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetEventsForMonth")
+	}
+
+	var r0 []*event.Event
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]*event.Event, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []*event.Event); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*event.Event)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockeventService_GetEventsForMonth_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetEventsForMonth'
+type MockeventService_GetEventsForMonth_Call struct {
+	*mock.Call
+}
+
+// GetEventsForMonth is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockeventService_Expecter) GetEventsForMonth(ctx interface{}) *MockeventService_GetEventsForMonth_Call {
+	return &MockeventService_GetEventsForMonth_Call{Call: _e.mock.On("GetEventsForMonth", ctx)}
+}
+
+func (_c *MockeventService_GetEventsForMonth_Call) Run(run func(ctx context.Context)) *MockeventService_GetEventsForMonth_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockeventService_GetEventsForMonth_Call) Return(_a0 []*event.Event, _a1 error) *MockeventService_GetEventsForMonth_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockeventService_GetEventsForMonth_Call) RunAndReturn(run func(context.Context) ([]*event.Event, error)) *MockeventService_GetEventsForMonth_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetEventsForToday provides a mock function with given fields: ctx
+func (_m *MockeventService) GetEventsForToday(ctx context.Context) ([]*event.Event, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetEventsForToday")
+	}
+
+	var r0 []*event.Event
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]*event.Event, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []*event.Event); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*event.Event)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockeventService_GetEventsForToday_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetEventsForToday'
+type MockeventService_GetEventsForToday_Call struct {
+	*mock.Call
+}
+
+// GetEventsForToday is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockeventService_Expecter) GetEventsForToday(ctx interface{}) *MockeventService_GetEventsForToday_Call {
+	return &MockeventService_GetEventsForToday_Call{Call: _e.mock.On("GetEventsForToday", ctx)}
+}
+
+func (_c *MockeventService_GetEventsForToday_Call) Run(run func(ctx context.Context)) *MockeventService_GetEventsForToday_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockeventService_GetEventsForToday_Call) Return(_a0 []*event.Event, _a1 error) *MockeventService_GetEventsForToday_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockeventService_GetEventsForToday_Call) RunAndReturn(run func(context.Context) ([]*event.Event, error)) *MockeventService_GetEventsForToday_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetEventsForWeek provides a mock function with given fields: ctx
+func (_m *MockeventService) GetEventsForWeek(ctx context.Context) ([]*event.Event, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetEventsForWeek")
+	}
+
+	var r0 []*event.Event
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]*event.Event, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []*event.Event); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*event.Event)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockeventService_GetEventsForWeek_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetEventsForWeek'
+type MockeventService_GetEventsForWeek_Call struct {
+	*mock.Call
+}
+
+// GetEventsForWeek is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *MockeventService_Expecter) GetEventsForWeek(ctx interface{}) *MockeventService_GetEventsForWeek_Call {
+	return &MockeventService_GetEventsForWeek_Call{Call: _e.mock.On("GetEventsForWeek", ctx)}
+}
+
+func (_c *MockeventService_GetEventsForWeek_Call) Run(run func(ctx context.Context)) *MockeventService_GetEventsForWeek_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MockeventService_GetEventsForWeek_Call) Return(_a0 []*event.Event, _a1 error) *MockeventService_GetEventsForWeek_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockeventService_GetEventsForWeek_Call) RunAndReturn(run func(context.Context) ([]*event.Event, error)) *MockeventService_GetEventsForWeek_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UpdateEvent provides a mock function with given fields: ctx, _a1
 func (_m *MockeventService) UpdateEvent(ctx context.Context, _a1 *event.Event) error {
 	ret := _m.Called(ctx, _a1)

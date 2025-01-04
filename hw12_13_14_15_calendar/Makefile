@@ -15,6 +15,10 @@ install-lint-deps:
 lint: install-lint-deps
 	golangci-lint run --config=.golangci.yml
 
+.PHONY: unit-test
+unit-test:
+	@echo "Running unit tests..."
+	go test -race -tags=unit ./...
 
 ###> Build and run ###
 DOCKER_IMG="calendar:develop"
@@ -45,38 +49,39 @@ run-img: build-img
 ###< Build and run ###
 
 ###> Test with Docker ###
-.PHONY: test
-test: start-test-db wait-for-test-db run-tests stop-test-db
+.PHONY: integration-test
+integration-test: start-test-db wait-for-test-db run-integration-tests stop-test-db
 
 .PHONY: start-test-db
 start-test-db:
 	docker-compose -f docker-compose-test.yaml up -d
 
 .PHONY: wait-for-test-db
-wait-for-test-db:
+wait-for-test-db: local-migration-up-test 
 	@echo "Waiting for test database to be ready..."
 	@until docker exec calendar_pg_test pg_isready -U $(PG_USER) -d $(PG_DATABASE); do \
 		sleep 1; \
 	done
 
-.PHONY: run-tests
-run-tests:
-	@echo "Running tests..."
+.PHONY: run-integration-tests
+run-integration-tests:
+	@echo "Running integration tests..."
 	PG_HOST=$(PG_HOST_TEST) \
 	PG_PORT=$(PG_PORT_TEST) \
 	PG_USER=$(PG_USER_TEST) \
 	PG_PASSWORD=$(PG_PASSWORD_TEST) \
 	PG_DATABASE=$(PG_DATABASE_TEST) \
-	go test -race ./internal/...
+	go test -race -tags=integration ./...
 
 .PHONY: stop-test-db
-stop-test-db:
+stop-test-db: local-migration-down-test
 	docker-compose -f docker-compose-test.yaml down
 ###< Test with Docker ###
 
 ###> Local db migrations ###
 LOCAL_MIGRATION_DIR=./migrations
 LOCAL_MIGRATION_DSN="host=$(PG_HOST) port=$(PG_PORT) dbname=$(PG_DATABASE) user=$(PG_USER) password=$(PG_PASSWORD)"
+LOCAL_MIGRATION_DSN_TEST="host=$(PG_HOST_TEST) port=$(PG_PORT_TEST) dbname=$(PG_DATABASE_TEST) user=$(PG_USER_TEST) password=$(PG_PASSWORD_TEST)"
 
 .PHONY: local-migration-create
 local-migration-status:
@@ -86,9 +91,17 @@ local-migration-status:
 local-migration-up:
 	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} up -v
 
+.PHONY: local-migration-up-test
+local-migration-up-test:
+	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN_TEST} up -v
+
 .PHONY: local-migration-down
 local-migration-down:
 	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} down -v
+	.PHONY: local-migration-down
+
+local-migration-down-test:
+	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN_TEST} down -v
 ###< Local db migrations ###
 
 ###> grpc ###

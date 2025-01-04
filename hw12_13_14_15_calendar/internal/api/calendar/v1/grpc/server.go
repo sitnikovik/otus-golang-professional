@@ -7,6 +7,7 @@ import (
 
 	"google.golang.org/grpc"
 
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/api/calendar/v1/grpc/interceptor"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
 	eventFilter "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/filter/event"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
@@ -28,6 +29,14 @@ type eventService interface {
 	GetEvents(ctx context.Context, filter eventFilter.Filter) ([]*eventModel.Event, error)
 }
 
+// implementation describes the gRPC server implementation.
+type Implementation struct {
+	pkg.UnimplementedEventServiceServer
+
+	// eventService describes the event service instance.
+	eventService eventService
+}
+
 // Server describes the app gRPC server implementation.
 type Server struct {
 	// server - gRPC server instance.
@@ -40,12 +49,21 @@ type Server struct {
 func NewServer(conf config.GRPCConf, eventService eventService) *Server {
 	s := &Server{
 		config: conf,
-		server: grpc.NewServer(),
+		server: grpc.NewServer(
+			grpc.UnaryInterceptor(interceptor.Logging),
+		),
 	}
 
 	pkg.RegisterEventServiceServer(s.server, newImplementation(eventService))
 
 	return s
+}
+
+// newImplementation creates and returns a new gRPC server implementation.
+func newImplementation(eventService eventService) *Implementation {
+	return &Implementation{
+		eventService: eventService,
+	}
 }
 
 // Serve starts the gRPC server.

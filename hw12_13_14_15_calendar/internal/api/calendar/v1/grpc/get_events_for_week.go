@@ -9,7 +9,7 @@ import (
 	pkg "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/pkg/calendar/v1"
 )
 
-// GetEventsForToday returns a list of events that will occur today.
+// GetEventsForWeek returns a list of events that will occur in the current week.
 func (i *Implementation) GetEventsForWeek(
 	ctx context.Context,
 	req *pkg.GetEventsForWeekRequest,

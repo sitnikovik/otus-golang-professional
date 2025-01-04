@@ -27,6 +27,14 @@ type eventService interface {
 	GetEvent(ctx context.Context, eventID uint64) (*eventModel.Event, error)
 	// GetEvents returns the events by filter.
 	GetEvents(ctx context.Context, filter eventFilter.Filter) ([]*eventModel.Event, error)
+	// GetEventsBeforeDays returns the events before days.
+	GetEventsBeforeDays(ctx context.Context, days uint32) ([]*eventModel.Event, error)
+	// GetEventsForMonth returns a list of events that will occur in the current month.
+	GetEventsForMonth(ctx context.Context) ([]*eventModel.Event, error)
+	// GetEventsForWeek returns a list of events that will occur in the current week.
+	GetEventsForWeek(ctx context.Context) ([]*eventModel.Event, error)
+	// GetEventsForToday returns a list of events that will occur today.
+	GetEventsForToday(ctx context.Context) ([]*eventModel.Event, error)
 }
 
 // DIContainer describes the DI container instance.

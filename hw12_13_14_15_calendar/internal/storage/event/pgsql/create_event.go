@@ -4,16 +4,36 @@ import (
 	"context"
 
 	"github.com/Masterminds/squirrel"
+
 	eventModel "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/model/event"
 )
 
 // CreateEvent creates a new event.
 func (s *PgStorage) CreateEvent(_ context.Context, event *eventModel.Event) (uint64, error) {
+	columns := allEventColumns[1:]
+	values := make([]interface{}, 0, len(columns))
+	for _, c := range columns {
+		switch c {
+		case "title":
+			values = append(values, event.Title)
+		case "created_at":
+			values = append(values, event.CreatedAt)
+		case "finished_at":
+			values = append(values, event.FinishedAt)
+		case "description":
+			values = append(values, event.Description)
+		case "owner_id":
+			values = append(values, event.OwnerID)
+		case "notify_before":
+			values = append(values, event.NotifyBefore)
+		}
+	}
+
 	sb := squirrel.
 		Insert(eventsTable).
 		PlaceholderFormat(squirrel.Dollar).
-		Columns(eventColumnsToInsert...).
-		Values(s.parseEventValuesForColumns(event)...).
+		Columns(columns...).
+		Values(values...).
 		Suffix("RETURNING id")
 
 	sql, args, err := sb.ToSql()
@@ -34,30 +54,4 @@ func (s *PgStorage) CreateEvent(_ context.Context, event *eventModel.Event) (uin
 	}
 
 	return id, nil
-}
-
-func (s *PgStorage) parseEventValuesForColumns(event *eventModel.Event) []interface{} {
-	if event == nil {
-		return nil
-	}
-
-	values := make([]interface{}, 0, len(eventColumnsToInsert))
-	for _, c := range eventColumnsToInsert {
-		switch c {
-		case "title":
-			values = append(values, event.Title)
-		case "created_at":
-			values = append(values, event.CreatedAt)
-		case "finished_at":
-			values = append(values, event.FinishedAt)
-		case "description":
-			values = append(values, event.Description)
-		case "owner_id":
-			values = append(values, event.OwnerID)
-		case "notify_before":
-			values = append(values, event.NotifyBefore)
-		}
-	}
-
-	return values
 }

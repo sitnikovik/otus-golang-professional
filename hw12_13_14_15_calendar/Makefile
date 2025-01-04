@@ -20,6 +20,12 @@ unit-test:
 	@echo "Running unit tests..."
 	go test -race -tags=unit ./...
 
+.PHONY: mocks
+mocks:
+	@echo "Generating mocks..."
+	go install github.com/vektra/mockery/v2/...@latest
+	mockery
+
 ###> Build and run ###
 DOCKER_IMG="calendar:develop"
 GIT_HASH := $(shell git log --format="%h" -n 1)

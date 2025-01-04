@@ -7,10 +7,6 @@ APP_BIN := "$(LOCAL_BIN)/calendar"
 version: build
 	$(BIN) version
 
-.PHONY: test
-test:
-	go test -race ./internal/...
-
 .PHONY: install-lint-deps
 install-lint-deps:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
@@ -47,6 +43,36 @@ run-img: build-img
 	docker-compose up --build
 	docker run $(DOCKER_IMG)
 ###< Build and run ###
+
+###> Test with Docker ###
+.PHONY: test
+test: start-test-db wait-for-test-db run-tests stop-test-db
+
+.PHONY: start-test-db
+start-test-db:
+	docker-compose -f docker-compose-test.yaml up -d
+
+.PHONY: wait-for-test-db
+wait-for-test-db:
+	@echo "Waiting for test database to be ready..."
+	@until docker exec calendar_pg_test pg_isready -U $(PG_USER) -d $(PG_DATABASE); do \
+		sleep 1; \
+	done
+
+.PHONY: run-tests
+run-tests:
+	@echo "Running tests..."
+	PG_HOST=$(PG_HOST_TEST) \
+	PG_PORT=$(PG_PORT_TEST) \
+	PG_USER=$(PG_USER_TEST) \
+	PG_PASSWORD=$(PG_PASSWORD_TEST) \
+	PG_DATABASE=$(PG_DATABASE_TEST) \
+	go test -race ./internal/...
+
+.PHONY: stop-test-db
+stop-test-db:
+	docker-compose -f docker-compose-test.yaml down
+###< Test with Docker ###
 
 ###> Local db migrations ###
 LOCAL_MIGRATION_DIR=./migrations

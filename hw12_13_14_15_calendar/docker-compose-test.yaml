@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  # Calendar database
+  calendar_pg_test:
+    image: postgres:14-alpine3.17
+    container_name: calendar_pg_test
+    environment:
+      - POSTGRES_DB=${PG_DATABASE_TEST}
+      - POSTGRES_USER=${PG_USER_TEST}
+      - POSTGRES_PASSWORD=${PG_PASSWORD_TEST}
+    ports:
+      - ${PG_PORT}:5432
+    volumes:
+      - postgres_test:/var/lib/postgresql/data
+
+volumes:
+  postgres_test:
+    driver: local

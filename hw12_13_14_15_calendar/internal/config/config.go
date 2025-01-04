@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/joho/godotenv"
@@ -101,4 +102,35 @@ func NewConfig(pathToFile string) (Config, error) {
 	cfg.GRPC.Host = getEnv("GRPC_HOST")
 
 	return cfg, nil
+}
+
+// NewTestConfig creates and returns the new test configuration.
+func NewTestConfig() (Config, error) {
+	rootdir, err := findRootDir()
+	if err != nil {
+		return Config{}, err
+	}
+	envFile := filepath.Join(rootdir, ".env")
+
+	return NewConfig(envFile)
+}
+
+// findRootDir searches for the root directory of the project by looking for go.mod file.
+func findRootDir() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir, nil
+		}
+
+		parentDir := filepath.Dir(dir)
+		if parentDir == dir {
+			return "", os.ErrNotExist
+		}
+		dir = parentDir
+	}
 }

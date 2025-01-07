@@ -19,7 +19,8 @@ services:
       - PG_HOST=calendar_pg
       - PG_PORT=5432
     ports:
-      - '8080:8080'
+      - ${HTTP_PORT}:8080
+      - ${GRPC_PORT}:50051
     depends_on:
       - calendar_pg
       

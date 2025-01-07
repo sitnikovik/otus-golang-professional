@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Masterminds/squirrel"
+
 	eventFilter "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/filter/event"
 	eventModel "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/model/event"
 )
@@ -19,8 +20,6 @@ var (
 		"owner_id",
 		"notify_before",
 	}
-	// eventColumnsToInsert is the list of fields for the event entity to insert.
-	eventColumnsToInsert = allEventColumns[1:]
 )
 
 // GetEvents returns the events by filter.

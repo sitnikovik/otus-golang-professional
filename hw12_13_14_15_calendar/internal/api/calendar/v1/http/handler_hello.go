@@ -1,4 +1,4 @@
-package calendar
+package http
 
 import "net/http"
 

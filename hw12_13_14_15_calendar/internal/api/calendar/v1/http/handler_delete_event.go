@@ -1,7 +1,6 @@
-package calendar
+package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -9,8 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// handlerGetEvent is the handler to get the event.
-func (s *Server) handlerGetEvent() http.HandlerFunc {
+func (s *Server) handlerDeleteEvent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -26,28 +24,19 @@ func (s *Server) handlerGetEvent() http.HandlerFunc {
 			return
 		}
 
-		// Get the event
-		event, err := s.app.DI().EventService().GetEvent(ctx, uint64(id))
+		// Delete the event
+		err := s.eventService.DeleteEvent(ctx, uint64(id))
 		if err != nil {
 			errorHandler(
 				w,
-				err,
+				fmt.Errorf("failed to delete event: %w", err),
 				http.StatusInternalServerError,
 			)
 			return
 		}
 
 		// Write response
-		bb, err := json.Marshal(event)
-		if err != nil {
-			errorHandler(
-				w,
-				fmt.Errorf("failed to marshal event: %w", err),
-				http.StatusInternalServerError,
-			)
-			return
-		}
 		w.WriteHeader(http.StatusOK)
-		w.Write(bb)
+		w.Write([]byte(""))
 	}
 }

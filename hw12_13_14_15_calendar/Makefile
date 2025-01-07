@@ -1,49 +1,97 @@
 include .env
 
-BIN := "./bin/calendar"
-DOCKER_IMG="calendar:develop"
+LOCAL_BIN:=$(CURDIR)/bin
+APP_BIN := "$(LOCAL_BIN)/calendar"
 
+.PHONY: version
+version: build
+	$(BIN) version
+
+.PHONY: install-lint-deps
+install-lint-deps:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+.PHONY: lint
+lint: install-lint-deps
+	golangci-lint run --config=.golangci.yml
+
+.PHONY: test
+test: unit-test
+
+.PHONY: unit-test
+unit-test:
+	@echo "Running unit tests..."
+	go test -race -tags=unit ./...
+
+.PHONY: mocks
+mocks:
+	@echo "Generating mocks..."
+	go install github.com/vektra/mockery/v2/...@latest
+	mockery
+
+###> Build and run ###
+DOCKER_IMG="calendar:develop"
 GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
 
+.PHONY: build
 build:
-	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
+	go build -v -o $(APP_BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
 
+.PHONY: run
 run: build
 	$(BIN) -config ./.env
 
+.PHONY: build-img
 build-img:
 	docker build \
 		--build-arg=LDFLAGS="$(LDFLAGS)" \
 		-t $(DOCKER_IMG) \
 		-f build/Dockerfile .
-	
-	
 
+.PHONY: run-img
 run-img: build-img
 	docker-compose build --no-cache
 	docker-compose down
 	docker-compose up --build
 	docker run $(DOCKER_IMG)
+###< Build and run ###
 
-version: build
-	$(BIN) version
+###> Test with Docker ###
+.PHONY: integration-test
+integration-test: start-test-db wait-for-test-db run-integration-tests stop-test-db
 
-test:
-	go test -race ./internal/...
+.PHONY: start-test-db
+start-test-db:
+	docker-compose -f docker-compose-test.yaml up -d
 
-install-lint-deps:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+.PHONY: wait-for-test-db
+wait-for-test-db: local-migration-up-test 
+	@echo "Waiting for test database to be ready..."
+	@until docker exec calendar_pg_test pg_isready -U $(PG_USER) -d $(PG_DATABASE); do \
+		sleep 1; \
+	done
 
-lint: install-lint-deps
-	golangci-lint run --config=.golangci.yml
+.PHONY: run-integration-tests
+run-integration-tests:
+	@echo "Running integration tests..."
+	PG_HOST=$(PG_HOST_TEST) \
+	PG_PORT=$(PG_PORT_TEST) \
+	PG_USER=$(PG_USER_TEST) \
+	PG_PASSWORD=$(PG_PASSWORD_TEST) \
+	PG_DATABASE=$(PG_DATABASE_TEST) \
+	go test -race -tags=integration ./...
 
-.PHONY: build run build-img run-img version test lint
+.PHONY: stop-test-db
+stop-test-db: local-migration-down-test
+	docker-compose -f docker-compose-test.yaml down
+###< Test with Docker ###
 
+###> Local db migrations ###
 LOCAL_MIGRATION_DIR=./migrations
 LOCAL_MIGRATION_DSN="host=$(PG_HOST) port=$(PG_PORT) dbname=$(PG_DATABASE) user=$(PG_USER) password=$(PG_PASSWORD)"
+LOCAL_MIGRATION_DSN_TEST="host=$(PG_HOST_TEST) port=$(PG_PORT_TEST) dbname=$(PG_DATABASE_TEST) user=$(PG_USER_TEST) password=$(PG_PASSWORD_TEST)"
 
-## Local db migrations
 .PHONY: local-migration-create
 local-migration-status:
 	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} status -v
@@ -52,7 +100,31 @@ local-migration-status:
 local-migration-up:
 	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} up -v
 
+.PHONY: local-migration-up-test
+local-migration-up-test:
+	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN_TEST} up -v
+
 .PHONY: local-migration-down
 local-migration-down:
 	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} down -v
+	.PHONY: local-migration-down
 
+local-migration-down-test:
+	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN_TEST} down -v
+###< Local db migrations ###
+
+###> grpc ###
+install-go-deps:
+	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
+	GOBIN=$(LOCAL_BIN) go install -mod=mod google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+
+generate: install-go-deps
+	rm -r pkg/calendar/v1
+	mkdir -p pkg/calendar/v1
+	protoc --proto_path api/calendar/v1 \
+	--go_out=pkg/calendar/v1 --go_opt=paths=source_relative \
+	--plugin=protoc-gen-go=bin/protoc-gen-go \
+	--go-grpc_out=pkg/calendar/v1 --go-grpc_opt=paths=source_relative \
+	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
+	api/calendar/v1/EventService.proto
+###< grpc ###

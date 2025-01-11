@@ -35,3 +35,12 @@ services:
       - ${PG_PORT}:5432
     volumes:
       - postgres:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "${RABBITMQ_PORT}:5672" # AMQP port for client connections
+      - "${RABBITMQ_PANEL_PORT}:15672" # Management web interface port
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}

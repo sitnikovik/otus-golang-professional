@@ -25,6 +25,8 @@ type Config struct {
 	HTTP HTTPConf `yaml:"http"`
 	// GRPC describes the GRPC server configuration.
 	GRPC GRPCConf `yaml:"grpc"`
+	// RabbitMQ describes the RabbitMQ configuration.
+	RabbitMQ RabbitMQConf `yaml:"rabbitmq"`
 }
 
 // LoggerConf describes the logging configuration.
@@ -74,6 +76,18 @@ type GRPCConf struct {
 	Port string `yaml:"port"`
 }
 
+// RabbitMQConf describes the RabbitMQ configuration.
+type RabbitMQConf struct {
+	// Host describes the RabbitMQ host.
+	Host string `yaml:"host"`
+	// Port describes the RabbitMQ port.
+	Port string `yaml:"port"`
+	// User describes the RabbitMQ user.
+	User string `yaml:"user"`
+	// Password describes the RabbitMQ password.
+	Password string `yaml:"password"`
+}
+
 // NewConfig creates and returns the new configuration.
 func NewConfig(pathToFile string) (Config, error) {
 	if err := godotenv.Load(pathToFile); err != nil {
@@ -100,6 +114,11 @@ func NewConfig(pathToFile string) (Config, error) {
 
 	cfg.GRPC.Port = getEnv("GRPC_PORT")
 	cfg.GRPC.Host = getEnv("GRPC_HOST")
+
+	cfg.RabbitMQ.Host = getEnv("RABBITMQ_HOST")
+	cfg.RabbitMQ.Port = getEnv("RABBITMQ_PORT")
+	cfg.RabbitMQ.User = getEnv("RABBITMQ_USER")
+	cfg.RabbitMQ.Password = getEnv("RABBITMQ_PASSWORD")
 
 	return cfg, nil
 }

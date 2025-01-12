@@ -27,6 +27,13 @@ type Config struct {
 	GRPC GRPCConf `yaml:"grpc"`
 	// RabbitMQ describes the RabbitMQ configuration.
 	RabbitMQ RabbitMQConf `yaml:"rabbitmq"`
+
+	// EventsQueueName describes the events queue name.
+	EventsQueueName string `yaml:"events_queue_name"`
+	// EventsExchangeName describes the events exchange name.
+	EventsExchangeName string `yaml:"events_exchange_name"`
+	// EventsExchangeType describes the events exchange type.
+	EventsExchangeType string `yaml:"events_exchange_type"`
 }
 
 // LoggerConf describes the logging configuration.
@@ -119,6 +126,10 @@ func NewConfig(pathToFile string) (Config, error) {
 	cfg.RabbitMQ.Port = getEnv("RABBITMQ_PORT")
 	cfg.RabbitMQ.User = getEnv("RABBITMQ_USER")
 	cfg.RabbitMQ.Password = getEnv("RABBITMQ_PASSWORD")
+
+	cfg.EventsQueueName = getEnv("EVENTS_QUEUE_NAME")
+	cfg.EventsExchangeName = getEnv("EVENTS_EXCHANGE_NAME")
+	cfg.EventsExchangeType = getEnv("EVENTS_EXCHANGE_TYPE")
 
 	return cfg, nil
 }

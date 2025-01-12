@@ -9,6 +9,7 @@ import (
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/connections/rabbitmq"
 )
 
+// App describes the app instance.
 type App struct {
 	// config describes the app configuration.
 	config config.Config

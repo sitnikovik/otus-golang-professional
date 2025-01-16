@@ -10,7 +10,6 @@ packages:
                 config:
                   dir: internal/service/event
                   filename: eventDB_mock.go
-                  output: internal/service/event/eventDB_mock.go
     github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/api/calendar/v1/grpc:
         # place your package-specific config here
         config:
@@ -21,4 +20,3 @@ packages:
                 config:
                     dir: internal/api/calendar/v1/grpc
                     filename: event_service_mock.go
-                    output: internal/api/calendar/v1/grpc/event_service_mock.go

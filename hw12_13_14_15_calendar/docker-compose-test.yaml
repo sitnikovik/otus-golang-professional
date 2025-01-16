@@ -10,7 +10,7 @@ services:
       - POSTGRES_USER=${PG_USER_TEST}
       - POSTGRES_PASSWORD=${PG_PASSWORD_TEST}
     ports:
-      - ${PG_PORT}:5432
+      - ${PG_PORT_TEST}:5432
     volumes:
       - postgres_test:/var/lib/postgresql/data
 

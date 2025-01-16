@@ -11,19 +11,24 @@ services:
   calendar_app:
     build:
       context: .
-      dockerfile: build/Dockerfile
-    environment:
-      - PG_DATABASE=${PG_DATABASE}
-      - PG_USER=${PG_USER}
-      - PG_PASSWORD=${PG_PASSWORD}
-      - PG_HOST=calendar_pg
-      - PG_PORT=5432
+      dockerfile: build/calendar/Dockerfile
     ports:
       - ${HTTP_PORT}:8080
       - ${GRPC_PORT}:50051
     depends_on:
       - calendar_pg
-      
+
+  # Scheduler application
+  scheduler_app:
+    build:
+      context: .
+      dockerfile: build/scheduler/Dockerfile
+    ports:
+      - ${RABBITMQ_PANEL_PORT}:15672
+    depends_on:
+      - calendar_pg
+      - rabbitmq
+
   # Calendar database
   calendar_pg:
     image: postgres:14-alpine3.17
@@ -39,8 +44,8 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - "${RABBITMQ_PORT}:5672" # AMQP port for client connections
-      - "${RABBITMQ_PANEL_PORT}:15672" # Management web interface port
+      - ${RABBITMQ_PORT}:5672 # AMQP port for client connections
+      # - ${RABBITMQ_PANEL_PORT}:15672 # Management web interface port
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}

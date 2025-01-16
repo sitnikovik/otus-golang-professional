@@ -44,6 +44,7 @@ func main() {
 // initConfig initializes the app configuration.
 func initConfig() config.Config {
 	// Configuration init
+	logger.Infof("Loading config from file: %s", configPath)
 	config, err := config.NewConfig(configPath)
 	if err != nil {
 		logger.Panicf("failed to load config: %v", err)

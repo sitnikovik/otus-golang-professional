@@ -29,4 +29,6 @@ type Event struct {
 	OwnerID uint64 `json:"ownerId" db:"owner_id"`
 	// NotifyBefore Time before the event to notify.
 	NotifyBefore time.Duration `json:"notifyBefore" db:"notify_before"`
+	// IsNotified Is the event notified.
+	IsNotified bool `json:"isNotified" db:"is_notified"`
 }

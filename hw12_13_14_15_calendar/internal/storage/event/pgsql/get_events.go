@@ -19,6 +19,7 @@ var (
 		"description",
 		"owner_id",
 		"notify_before",
+		"is_notify",
 	}
 )
 

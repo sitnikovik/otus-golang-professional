@@ -25,6 +25,9 @@ type Filter struct {
 	Limit uint64
 	// Offset - the offset of the events for pagination.
 	Offset uint64
+
+	// IsNotified - the flag to filter notified events.
+	IsNotified *bool
 }
 
 // Empty checks if the filter is full empty.

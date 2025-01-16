@@ -31,30 +31,55 @@ mocks:
 
 ###> Build and run ###
 DOCKER_IMG="calendar:develop"
+DOCKER_SCHEDULER_IMG="scheduler:develop"
+API_DOCKER_COMPOSE_FILE="build/calendar/docker-compose.yaml"
+API_TEST_DOCKER_COMPOSE_FILE="build/calendar/docker-compose-test.yaml"
+SCHEDULER_DOCKER_COMPOSE_FILE="build/scheduler/docker-compose.yaml"
 GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
 
 .PHONY: build
-build:
+build: build-calendar build-scheduler
+
+.PHONY: build-calendar
+build-calendar:
 	go build -v -o $(APP_BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
+
+.PHONY: build-scheduler
+build-scheduler:
+	go build -v -o $(APP_BIN) -ldflags "$(LDFLAGS)" ./cmd/scheduler
 
 .PHONY: run
 run: build
 	$(BIN) -config ./.env
 
-.PHONY: build-img
-build-img:
+.PHONY: build-calendar-img
+build-calendar-img:
 	docker build \
 		--build-arg=LDFLAGS="$(LDFLAGS)" \
 		-t $(DOCKER_IMG) \
-		-f build/Dockerfile .
+		-f build/calendar/Dockerfile .
 
-.PHONY: run-img
-run-img: build-img
-	docker-compose build --no-cache
-	docker-compose down
-	docker-compose up --build
+.PHONY: build-scheduler-img
+build-scheduler-img:
+	docker build \
+		--build-arg=LDFLAGS="$(LDFLAGS)" \
+		-t $(DOCKER_SCHEDULER_IMG) \
+		-f build/scheduler/Dockerfile .
+
+.PHONY: run-calendar-img
+run-calendar-img: build-calendar-img
+	docker-compose build calendar_app --no-cache
+	docker-compose down calendar_app
+	docker-compose up calendar_app --build
 	docker run $(DOCKER_IMG)
+	
+.PHONY: run-scheduler-img
+run-scheduler-img: build-scheduler-img
+	docker-compose build scheduler_app --no-cache
+	docker-compose down scheduler_app
+	docker-compose up scheduler_app --build
+	docker run $(DOCKER_SCHEDULER_IMG)
 ###< Build and run ###
 
 ###> Test with Docker ###
@@ -63,7 +88,7 @@ integration-test: start-test-db wait-for-test-db run-integration-tests stop-test
 
 .PHONY: start-test-db
 start-test-db:
-	docker-compose -f docker-compose-test.yaml up -d
+	docker-compose -f $(API_TEST_DOCKER_COMPOSE_FILE) up -d
 
 .PHONY: wait-for-test-db
 wait-for-test-db: local-migration-up-test 
@@ -84,7 +109,7 @@ run-integration-tests:
 
 .PHONY: stop-test-db
 stop-test-db: local-migration-down-test
-	docker-compose -f docker-compose-test.yaml down
+	docker-compose -f $(API_TEST_DOCKER_COMPOSE_FILE) down
 ###< Test with Docker ###
 
 ###> Local db migrations ###

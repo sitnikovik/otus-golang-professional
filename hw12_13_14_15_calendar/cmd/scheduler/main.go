@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 
 	schedulerApp "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app/scheduler"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
@@ -10,6 +11,15 @@ import (
 
 // configPath is the path to the configuration file to specified by the user via flag.
 var configPath string
+
+func init() {
+	flag.StringVar(
+		&configPath,
+		"config",
+		"/etc/scheduler/.env",
+		"Path to configuration file",
+	)
+}
 
 func main() {
 	// Configuration init
@@ -28,11 +38,11 @@ func main() {
 // initConfig initializes the app configuration.
 func initConfig() config.Config {
 	// Configuration init
+	logger.Infof("Loading config from file: %s", configPath)
 	config, err := config.NewConfig(configPath)
 	if err != nil {
 		logger.Panicf("failed to load config: %v", err)
 	}
-	logger.Debugf("Used config file: %s", configPath)
 
 	configLevel := config.Logger.Level
 	logger.SetLevel(logger.LevelFromString(configLevel))

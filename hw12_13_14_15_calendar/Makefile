@@ -114,7 +114,7 @@ stop-test-db: local-migration-down-test
 
 ###> Local db migrations ###
 LOCAL_MIGRATION_DIR=./migrations
-LOCAL_MIGRATION_DSN="host=$(PG_HOST) port=$(PG_PORT) dbname=$(PG_DATABASE) user=$(PG_USER) password=$(PG_PASSWORD)"
+LOCAL_MIGRATION_DSN="host=$(PG_HOST_LOCAL) port=$(PG_PORT_LOCAL) dbname=$(PG_DATABASE) user=$(PG_USER) password=$(PG_PASSWORD)"
 LOCAL_MIGRATION_DSN_TEST="host=$(PG_HOST_TEST) port=$(PG_PORT_TEST) dbname=$(PG_DATABASE_TEST) user=$(PG_USER_TEST) password=$(PG_PASSWORD_TEST)"
 
 .PHONY: local-migration-create

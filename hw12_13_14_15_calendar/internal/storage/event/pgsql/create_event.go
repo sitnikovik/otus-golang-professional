@@ -26,7 +26,7 @@ func (s *PgStorage) CreateEvent(_ context.Context, event *eventModel.Event) (uin
 			values = append(values, event.OwnerID)
 		case "notify_before":
 			values = append(values, event.NotifyBefore)
-		case "is_notify":
+		case "is_notified":
 			values = append(values, event.IsNotified)
 		}
 	}

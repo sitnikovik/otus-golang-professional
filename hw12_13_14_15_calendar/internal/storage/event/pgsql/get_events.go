@@ -19,7 +19,7 @@ var (
 		"description",
 		"owner_id",
 		"notify_before",
-		"is_notify",
+		"is_notified",
 	}
 )
 
@@ -57,7 +57,7 @@ func (s *PgStorage) GetEvents(_ context.Context, filter eventFilter.Filter) ([]*
 	}
 
 	if filter.IsNotified != nil {
-		sb = sb.Where(squirrel.Eq{"is_notify": filter.IsNotified})
+		sb = sb.Where(squirrel.Eq{"is_notified": *filter.IsNotified})
 	}
 
 	sql, args, err := sb.ToSql()

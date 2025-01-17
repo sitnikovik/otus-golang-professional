@@ -60,6 +60,7 @@ func (s *PgStorage) GetEvents(_ context.Context, filter eventFilter.Filter) ([]*
 			&event.Description,
 			&event.OwnerID,
 			&event.NotifyBefore,
+			&event.IsNotified,
 		)
 		if err != nil {
 			return nil, err

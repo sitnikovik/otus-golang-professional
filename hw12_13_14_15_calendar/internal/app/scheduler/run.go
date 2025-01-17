@@ -4,46 +4,81 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app/panics"
 	eventsFilter "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/filter/event"
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
 )
 
 // Run runs the app.
 func (a *App) Run(ctx context.Context) error {
-	err := a.publishEvents(ctx, 1*time.Second)
-	if err != nil {
-		return fmt.Errorf("failed to publish events: %w", err)
-	}
+	var wg sync.WaitGroup
 
-	err = a.deleteOldEvents(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to clean old events: %w", err)
-	}
+	// Run publishing in parallel
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		defer panics.Recover()
 
+		if err := a.publishEvents(ctx, 1*time.Second); err != nil {
+			logger.Criticalf("failed to publish events: %v", err)
+		}
+	}()
+
+	// Run cleaning in parallel
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		defer panics.Recover()
+
+		err := a.deleteOldEvents(ctx)
+		if err != nil {
+			logger.Criticalf("failed to clean old events: %v", err)
+		}
+	}()
+
+	wg.Wait()
 	return nil
 }
 
 // publishEvents publishes events to the events queue.
 func (a *App) publishEvents(ctx context.Context, interval time.Duration) error {
-	ticker := time.NewTicker(interval) // TODO: move to config
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
+	notNotified := false
 	for range ticker.C {
-		events, err := a.di.EventService().GetEventsForToday(ctx)
+		events, err := a.di.EventService().GetEvents(ctx, eventsFilter.Filter{
+			IsNotified: &notNotified,
+		})
 		if err != nil {
 			return fmt.Errorf("failed to get events: %w", err)
 		}
 
+		if len(events) == 0 {
+			continue
+		}
+
+		logger.Infof("found %d events to publish", len(events))
 		for _, event := range events {
 			eventAsJSON, err := json.Marshal(event)
 			if err != nil {
-				return fmt.Errorf("failed to marshal event with id \"%d\": %w", event.ID, err)
+				logger.Errorf("failed to marshal event with id \"%d\": %v", event.ID, err)
+				continue
 			}
 
 			// TODO: add routing key
 			if err := a.rabbitmq.PublishJSON(ctx, "", eventAsJSON); err != nil {
-				return fmt.Errorf("failed to publish message: %w", err)
+				logger.Criticalf("failed to publish event with id \"%d\": %v", event.ID, err)
+				continue
+			}
+
+			logger.Infof("event with id \"%d\" has been published", event.ID)
+			event.IsNotified = true
+			if err := a.DI().EventService().UpdateEvent(ctx, event); err != nil {
+				logger.Alertf("failed to update event with id \"%d\": %v", event.ID, err)
 			}
 		}
 	}
@@ -62,11 +97,18 @@ func (a *App) deleteOldEvents(ctx context.Context) error {
 		return fmt.Errorf("failed to get events: %w", err)
 	}
 
+	if len(events) == 0 {
+		return nil
+	}
+
 	// Delete events
+	logger.Infof("deleting %d old events...", len(events))
 	for _, event := range events {
 		if err := a.di.EventService().DeleteEvent(ctx, event.ID); err != nil {
-			return fmt.Errorf("failed to delete event with id \"%d\": %w", event.ID, err)
+			logger.Criticalf("failed to delete event with id \"%d\": %v", event.ID, err)
+			continue
 		}
+		logger.Debugf("event with id \"%d\" has been deleted", event.ID)
 	}
 
 	return nil

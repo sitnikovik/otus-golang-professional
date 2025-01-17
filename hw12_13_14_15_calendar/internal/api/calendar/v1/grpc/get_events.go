@@ -78,6 +78,7 @@ func eventsToResponse(events []*event.Event) []*pkg.Event {
 			FinishedAt:   finishedAt,
 			OwnerId:      event.OwnerID,
 			NotifyBefore: int64(event.NotifyBefore),
+			IsNotified:   event.IsNotified,
 		})
 	}
 

@@ -49,9 +49,12 @@ func (a *App) publishEvents(ctx context.Context, interval time.Duration) error {
 	defer ticker.Stop()
 
 	notNotified := false
+	finishedTo := time.Now()
+
 	for range ticker.C {
 		events, err := a.di.EventService().GetEvents(ctx, eventsFilter.Filter{
 			IsNotified: &notNotified,
+			FinishedTo: &finishedTo,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to get events: %w", err)
@@ -63,6 +66,11 @@ func (a *App) publishEvents(ctx context.Context, interval time.Duration) error {
 
 		logger.Infof("found %d events to publish", len(events))
 		for _, event := range events {
+			if !event.IsToNotify() {
+				logger.Debugf("event with id \"%d\" is not to notify now", event.ID)
+				continue
+			}
+
 			eventAsJSON, err := json.Marshal(event)
 			if err != nil {
 				logger.Errorf("failed to marshal event with id \"%d\": %v", event.ID, err)

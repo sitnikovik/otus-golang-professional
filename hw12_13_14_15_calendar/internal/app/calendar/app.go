@@ -1,4 +1,4 @@
-package app
+package calendar
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/api/calendar/v1/grpc"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/api/calendar/v1/http"
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
 )
 
@@ -14,7 +15,7 @@ type App struct {
 	// config describes the app configuration.
 	config config.Config
 	// di describes the DI container instance to store the app dependencies.
-	di *DIContainer
+	di *app.DIContainer
 	// grpcServer describes the gRPC server instance.
 	grpcServer *grpc.Server
 	// httpServer describes the HTTP server instance.
@@ -35,7 +36,7 @@ func New(ctx context.Context, config config.Config) *App {
 }
 
 // DI returns the DI container instance to use the app dependencies.
-func (a *App) DI() *DIContainer {
+func (a *App) DI() *app.DIContainer {
 	return a.di
 }
 

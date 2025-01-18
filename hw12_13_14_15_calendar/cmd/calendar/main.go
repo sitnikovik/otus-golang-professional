@@ -4,7 +4,7 @@ import (
 	"context"
 	"flag"
 
-	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
+	calendarApp "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app/calendar"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/config"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
 )
@@ -33,10 +33,10 @@ func main() {
 
 	// App init
 	ctx := context.Background()
-	calendarApp := app.New(ctx, config)
+	calendarApp := calendarApp.New(ctx, config)
 
 	// Run the app
-	if err := calendarApp.Run(); err != nil {
+	if err := calendarApp.Run(ctx); err != nil {
 		logger.Panicf("failed to run app: %v", err)
 	}
 }

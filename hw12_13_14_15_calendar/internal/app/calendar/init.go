@@ -1,10 +1,11 @@
-package app
+package calendar
 
 import (
 	"context"
 
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/api/calendar/v1/grpc"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/api/calendar/v1/http"
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app"
 )
 
 func (a *App) init(ctx context.Context) error {
@@ -25,7 +26,7 @@ func (a *App) init(ctx context.Context) error {
 
 // initDI initializes the DI container.
 func (a *App) initDI(ctx context.Context) error {
-	a.di = NewDIContainer(a.config)
+	a.di = app.NewDIContainer(a.config)
 
 	return nil
 }

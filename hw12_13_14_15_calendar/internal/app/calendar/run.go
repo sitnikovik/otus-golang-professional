@@ -1,4 +1,4 @@
-package app
+package calendar
 
 import (
 	"context"
@@ -15,9 +15,9 @@ import (
 )
 
 // Run runs the app.
-func (a *App) Run() error {
+func (a *App) Run(ctx context.Context) error {
 	ctx, cancel := signal.NotifyContext(
-		context.Background(),
+		ctx,
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP,
 	)
 	defer cancel()

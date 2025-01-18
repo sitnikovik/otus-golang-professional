@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app/panics"
 	eventsFilter "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/filter/event"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/panics"
 )
 
 // Run runs the app.

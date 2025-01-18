@@ -10,8 +10,8 @@ import (
 
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/api/calendar/v1/grpc"
 	calendarHttpServer "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/api/calendar/v1/http"
-	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app/panics"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/panics"
 )
 
 // Run runs the app.

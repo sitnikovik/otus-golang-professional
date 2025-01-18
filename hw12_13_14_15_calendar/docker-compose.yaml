@@ -29,6 +29,14 @@ services:
       - calendar_pg
       - rabbitmq
 
+  # Sender application
+  sender_app:
+    build:
+      context: .
+      dockerfile: build/sender/Dockerfile
+    depends_on:
+      - rabbitmq
+
   # Calendar database
   calendar_pg:
     image: postgres:14-alpine3.17

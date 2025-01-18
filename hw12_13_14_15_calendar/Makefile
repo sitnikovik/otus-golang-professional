@@ -32,6 +32,7 @@ mocks:
 ###> Build and run ###
 DOCKER_IMG="calendar:develop"
 DOCKER_SCHEDULER_IMG="scheduler:develop"
+DOCKER_SENDER_IMG="sender:develop"
 API_DOCKER_COMPOSE_FILE="build/calendar/docker-compose.yaml"
 API_TEST_DOCKER_COMPOSE_FILE="docker-compose-test.yaml"
 SCHEDULER_DOCKER_COMPOSE_FILE="build/scheduler/docker-compose.yaml"
@@ -48,6 +49,10 @@ build-calendar:
 .PHONY: build-scheduler
 build-scheduler:
 	go build -v -o $(APP_BIN) -ldflags "$(LDFLAGS)" ./cmd/scheduler
+
+.PHONY: build-sender
+build-sender:
+	go build -v -o $(APP_BIN) -ldflags "$(LDFLAGS)" ./cmd/sender
 
 .PHONY: run
 run: build
@@ -67,6 +72,13 @@ build-scheduler-img:
 		-t $(DOCKER_SCHEDULER_IMG) \
 		-f build/scheduler/Dockerfile .
 
+.PHONY: build-sender-img
+build-sender-img:
+	docker build \
+		--build-arg=LDFLAGS="$(LDFLAGS)" \
+		-t $(DOCKER_SENDER_IMG) \
+		-f build/sender/Dockerfile .
+
 .PHONY: run-calendar-img
 run-calendar-img: build-calendar-img
 	docker-compose build calendar_app --no-cache
@@ -80,6 +92,13 @@ run-scheduler-img: build-scheduler-img
 	docker-compose down scheduler_app
 	docker-compose up scheduler_app --build
 	docker run $(DOCKER_SCHEDULER_IMG)
+
+.PHONY: run-sender-img
+run-sender-img: build-sender-img
+	docker-compose build sender_app --no-cache
+	docker-compose down sender_app
+	docker-compose up sender_app --build
+	docker run $(DOCKER_SENDER_IMG)
 ###< Build and run ###
 
 ###> Test with Docker ###

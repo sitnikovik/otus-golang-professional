@@ -69,8 +69,8 @@ func (a *App) publishEvents(ctx context.Context, interval time.Duration) error {
 				continue
 			}
 
-			// TODO: add routing key
-			if err := a.rabbitmq.PublishJSON(ctx, "", eventAsJSON); err != nil {
+			routingKey := fmt.Sprintf("event.%d", event.ID)
+			if err := a.rabbitmq.PublishJSON(ctx, routingKey, eventAsJSON); err != nil {
 				logger.Criticalf("failed to publish event with id \"%d\": %v", event.ID, err)
 				continue
 			}

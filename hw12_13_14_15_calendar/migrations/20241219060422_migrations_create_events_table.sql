@@ -8,8 +8,10 @@ CREATE TABLE events
     finished_at TIMESTAMP NULL,
     description TEXT NOT NULL,
     owner_id BIGINT NOT NULL,
-    notify_before INT NOT NULL
-)
+    notify_before INT NOT NULL,
+    is_notified BOOLEAN NOT NULL
+);
+ALTER SEQUENCE events_id_seq RESTART WITH 1;
 -- +goose StatementEnd
 
 -- +goose Down

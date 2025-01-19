@@ -1,4 +1,4 @@
-package app
+package calendar
 
 import (
 	"context"
@@ -10,14 +10,14 @@ import (
 
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/api/calendar/v1/grpc"
 	calendarHttpServer "github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/api/calendar/v1/http"
-	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/app/panics"
 	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/logger"
+	"github.com/sitnikovik/otus-golang-professional/hw12_13_14_15_calendar/internal/panics"
 )
 
 // Run runs the app.
-func (a *App) Run() error {
+func (a *App) Run(ctx context.Context) error {
 	ctx, cancel := signal.NotifyContext(
-		context.Background(),
+		ctx,
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP,
 	)
 	defer cancel()

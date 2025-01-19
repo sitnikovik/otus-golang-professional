@@ -19,6 +19,7 @@ var (
 		"description",
 		"owner_id",
 		"notify_before",
+		"is_notified",
 	}
 )
 
@@ -30,11 +31,33 @@ func (s *PgStorage) GetEvents(_ context.Context, filter eventFilter.Filter) ([]*
 		PlaceholderFormat(squirrel.Dollar).
 		OrderBy("id ASC")
 
+	if filter.Limit > 0 {
+		sb = sb.Limit(filter.Limit)
+	}
+	if filter.Offset > 0 {
+		sb = sb.Offset(filter.Offset)
+	}
 	if len(filter.IDs) > 0 {
 		sb = sb.Where(squirrel.Eq{"id": filter.IDs})
 	}
-	if filter.Limit > 0 {
-		sb = sb.Limit(filter.Limit)
+	if len(filter.OwnerIDs) > 0 {
+		sb = sb.Where(squirrel.Eq{"owner_id": filter.OwnerIDs})
+	}
+	if filter.CreatedFrom != nil {
+		sb = sb.Where(squirrel.GtOrEq{"created_at": filter.CreatedFrom})
+	}
+	if filter.CreatedTo != nil {
+		sb = sb.Where(squirrel.Lt{"created_at": filter.CreatedTo})
+	}
+	if filter.FinishedFrom != nil {
+		sb = sb.Where(squirrel.GtOrEq{"finished_at": filter.FinishedFrom})
+	}
+	if filter.FinishedTo != nil {
+		sb = sb.Where(squirrel.Lt{"finished_at": filter.FinishedTo})
+	}
+
+	if filter.IsNotified != nil {
+		sb = sb.Where(squirrel.Eq{"is_notified": *filter.IsNotified})
 	}
 
 	sql, args, err := sb.ToSql()
@@ -59,6 +82,7 @@ func (s *PgStorage) GetEvents(_ context.Context, filter eventFilter.Filter) ([]*
 			&event.Description,
 			&event.OwnerID,
 			&event.NotifyBefore,
+			&event.IsNotified,
 		)
 		if err != nil {
 			return nil, err

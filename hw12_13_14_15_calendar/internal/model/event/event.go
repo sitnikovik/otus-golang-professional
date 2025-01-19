@@ -29,4 +29,29 @@ type Event struct {
 	OwnerID uint64 `json:"ownerId" db:"owner_id"`
 	// NotifyBefore Time before the event to notify.
 	NotifyBefore time.Duration `json:"notifyBefore" db:"notify_before"`
+	// IsNotified Is the event notified.
+	IsNotified bool `json:"isNotified" db:"is_notified"`
+}
+
+// IsToNotify checks if the event is to notify.
+func (e *Event) IsToNotify() bool {
+	if e.IsNotified || e.FinishedAt == nil {
+		return false
+	}
+
+	now := time.Now()
+	finishedAt := *e.FinishedAt
+	notifyTime := finishedAt.Add(-e.NotifyBefore)
+
+	// Check if the event is within the notification window
+	if now.After(notifyTime) && now.Before(finishedAt) {
+		return true
+	}
+
+	// Check if the event has passed and not yet notified
+	if now.After(finishedAt) {
+		return true
+	}
+
+	return false
 }

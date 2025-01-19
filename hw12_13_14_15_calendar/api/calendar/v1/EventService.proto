@@ -46,6 +46,8 @@ message Event {
     uint64 owner_id = 6;
     // Duration before the event to notify the owner.
     int64 notify_before = 7;
+    // Is needed to notify the owner.
+    bool is_notified = 8;
 }
 
 // CreateEventResponse is a response for the CreateEvent request.

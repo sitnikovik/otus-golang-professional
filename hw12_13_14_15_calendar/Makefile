@@ -107,6 +107,7 @@ integration-test: start-test-db wait-for-test-db run-integration-tests stop-test
 
 .PHONY: start-test-db
 start-test-db:
+	. ./configs/setenv.sh .env.test && \
 	docker-compose -f $(API_TEST_DOCKER_COMPOSE_FILE) up -d
 
 .PHONY: wait-for-test-db
@@ -119,11 +120,6 @@ wait-for-test-db: local-migration-up-test
 .PHONY: run-integration-tests
 run-integration-tests:
 	@echo "Running integration tests..."
-	PG_HOST=$(PG_HOST_TEST) \
-	PG_PORT=$(PG_PORT_TEST) \
-	PG_USER=$(PG_USER_TEST) \
-	PG_PASSWORD=$(PG_PASSWORD_TEST) \
-	PG_DATABASE=$(PG_DATABASE_TEST) \
 	go test -race -tags=integration ./...
 
 .PHONY: stop-test-db
@@ -136,25 +132,30 @@ LOCAL_MIGRATION_DIR=./migrations
 LOCAL_MIGRATION_DSN="host=$(PG_HOST_LOCAL) port=$(PG_PORT_LOCAL) dbname=$(PG_DATABASE) user=$(PG_USER) password=$(PG_PASSWORD)"
 LOCAL_MIGRATION_DSN_TEST="host=$(PG_HOST_TEST) port=$(PG_PORT_TEST) dbname=$(PG_DATABASE_TEST) user=$(PG_USER_TEST) password=$(PG_PASSWORD_TEST)"
 
-.PHONY: local-migration-create
+.PHONY: local-migration-status
 local-migration-status:
-	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} status -v
+	. ./configs/setenv.sh .env && \
+	./migrations/postgres/status.sh
 
 .PHONY: local-migration-up
 local-migration-up:
-	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} up -v
+	. ./configs/setenv.sh .env && \
+	./migrations/postgres/up.sh -c
 
 .PHONY: local-migration-up-test
 local-migration-up-test:
-	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN_TEST} up -v
+	. ./configs/setenv.sh .env.test && \
+	./migrations/postgres/up.sh
 
 .PHONY: local-migration-down
 local-migration-down:
-	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN} down -v
-	.PHONY: local-migration-down
+	. ./configs/setenv.sh .env && \
+	./migrations/postgres/down.sh
 
+.PHONY: local-migration-down-test
 local-migration-down-test:
-	goose -dir ${LOCAL_MIGRATION_DIR} postgres ${LOCAL_MIGRATION_DSN_TEST} down -v
+	. ./configs/setenv.sh .env.test && \
+	./migrations/postgres/down.sh
 ###< Local db migrations ###
 
 ###> grpc ###

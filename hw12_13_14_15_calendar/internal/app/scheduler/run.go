@@ -84,10 +84,6 @@ func (a *App) publishEvents(ctx context.Context, interval time.Duration) error {
 			}
 
 			logger.Infof("event with id \"%d\" has been published", event.ID)
-			event.IsNotified = true
-			if err := a.DI().EventService().UpdateEvent(ctx, event); err != nil {
-				logger.Alertf("failed to update event with id \"%d\": %v", event.ID, err)
-			}
 		}
 	}
 

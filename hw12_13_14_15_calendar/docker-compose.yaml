@@ -17,6 +17,7 @@ services:
       - ${GRPC_PORT}:50051
     depends_on:
       - calendar_pg
+      - migrate
 
   # Scheduler application
   scheduler_app:
@@ -27,6 +28,7 @@ services:
       - ${RABBITMQ_PANEL_PORT}:15672
     depends_on:
       - calendar_pg
+      - migrate
       - rabbitmq
 
   # Sender application
@@ -35,6 +37,8 @@ services:
       context: .
       dockerfile: build/sender/Dockerfile
     depends_on:
+      - calendar_pg
+      - migrate
       - rabbitmq
 
   # Calendar database
@@ -57,3 +61,14 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+
+  # Migration service
+  migrate:
+    image: golang:1.17-alpine
+    volumes:
+      - .:/app
+    working_dir: /app
+    entrypoint: ["make", "local-migration-up"]
+    depends_on:
+      - calendar_pg
+    restart: "no"

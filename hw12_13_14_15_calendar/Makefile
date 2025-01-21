@@ -130,8 +130,8 @@ down-rabbitmq:
 ###< Build and run ###
 
 ###> Test with Docker ###
-.PHONY: integration-test
-integration-test: start-test-db wait-for-test-db run-integration-tests stop-test-db
+.PHONY: integration-tests
+integration-tests: start-test-db wait-for-test-db run-integration-tests stop-test-db
 
 .PHONY: start-test-db
 start-test-db:

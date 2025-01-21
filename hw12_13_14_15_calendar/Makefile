@@ -131,7 +131,11 @@ down-rabbitmq:
 
 ###> Test with Docker ###
 .PHONY: integration-tests
-integration-tests: start-test-db wait-for-test-db run-integration-tests stop-test-db
+integration-tests: start-test-db wait-for-test-db
+	@$(MAKE) run-integration-tests && \
+	$(MAKE) stop-test-db && \
+	echo "✅ Integration tests passed" && exit 0 || \
+	($(MAKE) stop-test-db && echo "❌ Integration tests failed" && exit 1)
 
 .PHONY: start-test-db
 start-test-db:

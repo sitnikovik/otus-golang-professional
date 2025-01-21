@@ -30,8 +30,5 @@ COPY --from=build ${BIN_FILE} ${BIN_FILE}
 ENV CONFIG_FILE /etc/sender/.env
 COPY .env ${CONFIG_FILE}
 
-# Expose the port
-EXPOSE ${RABBITMQ_PANEL_PORT}
-
 # Command to run the application
 CMD ${BIN_FILE} -config ${CONFIG_FILE}

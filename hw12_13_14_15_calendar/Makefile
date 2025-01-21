@@ -40,7 +40,7 @@ GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
 
 .PHONY: build
-build: build-calendar build-scheduler
+build: build-calendar-img build-scheduler-img build-sender-img
 
 .PHONY: build-calendar
 build-calendar:
@@ -57,6 +57,14 @@ build-sender:
 .PHONY: run
 run: build
 	$(BIN) -config ./.env
+
+.PHONY: up
+up: build
+	docker-compose up -d
+
+.PHONY: down
+down:
+	docker-compose down
 
 .PHONY: build-calendar-img
 build-calendar-img:
@@ -83,22 +91,42 @@ build-sender-img:
 run-calendar-img: build-calendar-img
 	docker-compose build calendar_app --no-cache
 	docker-compose down calendar_app
-	docker-compose up calendar_app --build
-	docker run $(DOCKER_IMG)
+	docker-compose up calendar_app -d --build
+	
+.PHONY: down-calendar-img
+down-calendar-img: 
+	docker-compose down calendar_app
+
+.PHONY: down-calendar-db
+down-calendar-db: 
+	docker-compose down calendar_pg
 	
 .PHONY: run-scheduler-img
 run-scheduler-img: build-scheduler-img
 	docker-compose build scheduler_app --no-cache
 	docker-compose down scheduler_app
-	docker-compose up scheduler_app --build
+	docker-compose up scheduler_app -d --build
 	docker run $(DOCKER_SCHEDULER_IMG)
+
+.PHONY: down-scheduler-img
+down-scheduler-img: 
+	docker-compose down scheduler_app
 
 .PHONY: run-sender-img
 run-sender-img: build-sender-img
 	docker-compose build sender_app --no-cache
 	docker-compose down sender_app
-	docker-compose up sender_app --build
+	docker-compose up sender_app -d --build
 	docker run $(DOCKER_SENDER_IMG)
+
+.PHONY: down-sender-img
+down-sender-img: 
+	docker-compose down sender_app
+
+.PHONY: down-rabbitmq
+down-rabbitmq: 
+	docker-compose down rabbitmq
+
 ###< Build and run ###
 
 ###> Test with Docker ###

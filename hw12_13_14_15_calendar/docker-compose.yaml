@@ -1,11 +1,5 @@
 version: '3'
 
-volumes:
-  postgres:
-    driver: local
-  redis:
-    driver: local
-
 services:
   # Calendar application
   calendar_app:
@@ -17,19 +11,19 @@ services:
       - ${GRPC_PORT}:50051
     depends_on:
       - calendar_pg
-      - migrate
+    networks:
+      - calendar_network
 
   # Scheduler application
   scheduler_app:
     build:
       context: .
       dockerfile: build/scheduler/Dockerfile
-    ports:
-      - ${RABBITMQ_PANEL_PORT}:15672
     depends_on:
       - calendar_pg
-      - migrate
       - rabbitmq
+    networks:
+      - calendar_network
 
   # Sender application
   sender_app:
@@ -38,8 +32,9 @@ services:
       dockerfile: build/sender/Dockerfile
     depends_on:
       - calendar_pg
-      - migrate
       - rabbitmq
+    networks:
+      - calendar_network
 
   # Calendar database
   calendar_pg:
@@ -52,23 +47,26 @@ services:
       - ${PG_PORT_LOCAL}:${PG_PORT}
     volumes:
       - postgres:/var/lib/postgresql/data
+    networks:
+      - calendar_network
 
   rabbitmq:
     image: rabbitmq:3-management
     ports:
-      - ${RABBITMQ_PORT}:5672 # AMQP port for client connections
-      # - ${RABBITMQ_PANEL_PORT}:15672 # Management web interface port
+      - 5672:5672 # AMQP port for client connections
+      - 15672:15672 # Management web interface port
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    networks:
+      - calendar_network
 
-  # Migration service
-  migrate:
-    image: golang:1.17-alpine
-    volumes:
-      - .:/app
-    working_dir: /app
-    entrypoint: ["make", "local-migration-up"]
-    depends_on:
-      - calendar_pg
-    restart: "no"
+volumes:
+  postgres:
+    driver: local
+  redis:
+    driver: local
+    
+networks:
+  calendar_network:
+    driver: bridge

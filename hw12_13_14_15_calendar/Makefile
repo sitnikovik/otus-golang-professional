@@ -33,9 +33,7 @@ mocks:
 DOCKER_IMG="calendar:develop"
 DOCKER_SCHEDULER_IMG="scheduler:develop"
 DOCKER_SENDER_IMG="sender:develop"
-API_DOCKER_COMPOSE_FILE="build/calendar/docker-compose.yaml"
 API_TEST_DOCKER_COMPOSE_FILE="docker-compose-test.yaml"
-SCHEDULER_DOCKER_COMPOSE_FILE="build/scheduler/docker-compose.yaml"
 GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
 
@@ -160,10 +158,6 @@ stop-test-db: local-migration-down-test
 ###< Test with Docker ###
 
 ###> Local db migrations ###
-LOCAL_MIGRATION_DIR=./migrations
-LOCAL_MIGRATION_DSN="host=$(PG_HOST_LOCAL) port=$(PG_PORT_LOCAL) dbname=$(PG_DATABASE) user=$(PG_USER) password=$(PG_PASSWORD)"
-LOCAL_MIGRATION_DSN_TEST="host=$(PG_HOST_TEST) port=$(PG_PORT_TEST) dbname=$(PG_DATABASE_TEST) user=$(PG_USER_TEST) password=$(PG_PASSWORD_TEST)"
-
 .PHONY: local-migration-status
 local-migration-status:
 	. ./configs/setenv.sh .env && \

@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "calendar-chart.fullname" . }}-calendar
+  labels:
+    {{- include "calendar-chart.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "calendar-chart.name" . }}
+      component: calendar
+  template:
+    metadata:
+      labels:
+        app: {{ include "calendar-chart.name" . }}
+        component: calendar
+    spec:
+      containers:
+        - name: calendar
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PG_DATABASE
+              value: {{ .Values.pgDatabase }}
+            - name: PG_USER
+              value: {{ .Values.pgUser }}
+            - name: PG_PASSWORD
+              value: {{ .Values.pgPassword }}
+            - name: PG_HOST
+              value: {{ .Values.pgHost }}
+            - name: PG_PORT
+              value: "5432"
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "calendar-chart.fullname" . }}-scheduler
+  labels:
+    {{- include "calendar-chart.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "calendar-chart.name" . }}
+      component: scheduler
+  template:
+    metadata:
+      labels:
+        app: {{ include "calendar-chart.name" . }}
+        component: scheduler
+    spec:
+      containers:
+        - name: scheduler
+          image: "{{ .Values.schedulerImage.repository }}:{{ .Values.schedulerImage.tag }}"
+          imagePullPolicy: {{ .Values.schedulerImage.pullPolicy }}
+          env:
+            - name: PG_DATABASE
+              value: {{ .Values.pgDatabase }}
+            - name: PG_USER
+              value: {{ .Values.pgUser }}
+            - name: PG_PASSWORD
+              value: {{ .Values.pgPassword }}
+            - name: PG_HOST
+              value: {{ .Values.pgHost }}
+            - name: PG_PORT
+              value: "5432"
+            - name: RABBITMQ_HOST
+              value: {{ .Values.rabbitmqHost }}
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USER
+              value: {{ .Values.rabbitmqUser }}
+            - name: RABBITMQ_PASSWORD
+              value: {{ .Values.rabbitmqPassword }}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "calendar-chart.fullname" . }}-sender
+  labels:
+    {{- include "calendar-chart.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "calendar-chart.name" . }}
+      component: sender
+  template:
+    metadata:
+      labels:
+        app: {{ include "calendar-chart.name" . }}
+        component: sender
+    spec:
+      containers:
+        - name: sender
+          image: "{{ .Values.senderImage.repository }}:{{ .Values.senderImage.tag }}"
+          imagePullPolicy: {{ .Values.senderImage.pullPolicy }}
+          env:
+            - name: RABBITMQ_HOST
+              value: {{ .Values.rabbitmqHost }}
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USER
+              value: {{ .Values.rabbitmqUser }}
+            - name: RABBITMQ_PASSWORD
+              value: {{ .Values.rabbitmqPassword }}

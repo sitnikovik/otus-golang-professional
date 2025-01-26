@@ -1,0 +1,29 @@
+image:
+  repository: calendar:develop
+  tag: latest
+  pullPolicy: IfNotPresent
+
+schedulerImage:
+  repository: scheduler:develop
+  tag: latest
+  pullPolicy: IfNotPresent
+
+senderImage:
+  repository: sender:develop
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+  hosts:
+    - host: calendar.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []

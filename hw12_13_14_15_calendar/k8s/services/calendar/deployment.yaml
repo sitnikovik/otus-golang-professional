@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calendar-app
+  labels:
+    app: calendar
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: calendar
+  template:
+    metadata:
+      labels:
+        app: calendar
+    spec:
+      containers:
+        - name: calendar
+          image: calendar:develop
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PG_DATABASE
+              value: calendar_db
+            - name: PG_USER
+              value: calendar_user
+            - name: PG_PASSWORD
+              value: calendar_password
+            - name: PG_HOST
+              value: calendar-pg
+            - name: PG_PORT
+              value: "5432"

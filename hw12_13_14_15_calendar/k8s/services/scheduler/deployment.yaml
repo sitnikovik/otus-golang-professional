@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduler-app
+  labels:
+    app: scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scheduler
+  template:
+    metadata:
+      labels:
+        app: scheduler
+    spec:
+      containers:
+        - name: scheduler
+          image: scheduler:develop
+          env:
+            - name: PG_DATABASE
+              value: calendar_db
+            - name: PG_USER
+              value: calendar_user
+            - name: PG_PASSWORD
+              value: calendar_password
+            - name: PG_HOST
+              value: calendar_pg
+            - name: PG_PORT
+              value: "5432"
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USER
+              value: guest
+            - name: RABBITMQ_PASSWORD
+              value: guest

@@ -205,7 +205,7 @@ generate: install-go-deps
 
 ###> k8s ###
 .PHONY: k8s-up
-k8s-up: k8s-start k8s-install-ingress-nginx  k8s-apply-services
+k8s-up: k8s-start k8s-install-ingress-nginx k8s-apply-services
 
 .PHONY: k8s-down
 k8s-down: k8s-delete-services k8s-stop

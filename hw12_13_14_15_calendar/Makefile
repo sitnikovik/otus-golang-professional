@@ -42,14 +42,17 @@ build: build-calendar-img build-scheduler-img build-sender-img
 
 .PHONY: build-calendar
 build-calendar:
+	eval $(minikube docker-env)
 	go build -v -o $(APP_BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
 
 .PHONY: build-scheduler
 build-scheduler:
+	eval $(minikube docker-env)
 	go build -v -o $(APP_BIN) -ldflags "$(LDFLAGS)" ./cmd/scheduler
 
 .PHONY: build-sender
 build-sender:
+	eval $(minikube docker-env)
 	go build -v -o $(APP_BIN) -ldflags "$(LDFLAGS)" ./cmd/sender
 
 .PHONY: run
@@ -199,3 +202,70 @@ generate: install-go-deps
 	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
 	api/calendar/v1/EventService.proto
 ###< grpc ###
+
+###> k8s ###
+.PHONY: k8s-up
+k8s-up: k8s-start k8s-install-ingress-nginx  k8s-apply-services
+
+.PHONY: k8s-down
+k8s-down: k8s-delete-services k8s-stop
+
+.PHONY: k8s-start
+k8s-start:
+	minikube start && \
+	eval $(minikube docker-env) && \
+	docker build -t calendar:develop -f build/calendar/Dockerfile . && \
+	docker build -t scheduler:develop -f build/scheduler/Dockerfile . && \
+	docker build -t sender:develop -f build/sender/Dockerfile .
+
+.PHONY: k8s-stop
+k8s-stop:
+	minikube stop
+
+.PHONY: k8s-install-ingress-nginx
+k8s-install-ingress-nginx:
+	@echo "Install Ingress NGINX Controller" && \
+	minikube addons enable ingress
+	kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+	kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+	kubectl patch svc ingress-nginx-controller -n ingress-nginx -p '{"spec": {"type": "NodePort"}}'
+
+.PHONY: k8s-apply
+k8s-apply-services:
+	kubectl apply -f k8s/services/calendar/deployment.yaml
+	kubectl apply -f k8s/services/calendar/service.yaml
+	kubectl apply -f k8s/services/scheduler/deployment.yaml
+	kubectl apply -f k8s/services/scheduler/service.yaml
+	kubectl apply -f k8s/services/sender/deployment.yaml
+	kubectl apply -f k8s/services/sender/service.yaml
+	kubectl apply -f k8s/services/postgres/deployment.yaml
+	kubectl apply -f k8s/services/postgres/service.yaml
+	kubectl apply -f k8s/services/rabbitmq/deployment.yaml
+	kubectl apply -f k8s/services/rabbitmq/service.yaml
+	kubectl apply -f k8s/services/ingress.yaml
+
+.PHONY: k8s-delete-services
+k8s-delete-services:
+	kubectl delete deployment calendar-app
+	kubectl delete deployment scheduler-app
+	kubectl delete deployment sender-app
+
+	kubectl delete svc calendar-service
+	kubectl delete svc scheduler-service
+	kubectl delete svc sender-service
+
+	kubectl delete ingress calendar-ingress
+	
+k8s-delete-pods:
+	kubectl delete pods --all
+
+.PHONY: k8s-status
+k8s-status:
+	kubectl get pods
+	kubectl get svc
+	kubectl get ingress
+
+.PHONY: k8s-helm-calendar
+k8s-helm-calendar:
+	helm install calendar-app ./k8s/helm/chart/calendar
+

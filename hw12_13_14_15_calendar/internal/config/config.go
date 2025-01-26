@@ -140,7 +140,7 @@ func NewTestConfig() (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
-	envFile := filepath.Join(rootdir, ".env")
+	envFile := filepath.Join(rootdir, ".env.test")
 
 	return NewConfig(envFile)
 }

@@ -17,6 +17,8 @@ spec:
       containers:
         - name: scheduler
           image: scheduler:develop
+          ports:
+            - containerPort: 8080
           env:
             - name: PG_DATABASE
               value: calendar_db
@@ -25,7 +27,7 @@ spec:
             - name: PG_PASSWORD
               value: calendar_password
             - name: PG_HOST
-              value: calendar_pg
+              value: calendar-pg
             - name: PG_PORT
               value: "5432"
             - name: RABBITMQ_HOST

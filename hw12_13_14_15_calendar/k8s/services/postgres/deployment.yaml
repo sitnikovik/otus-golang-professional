@@ -19,7 +19,7 @@ spec:
           image: postgres:13
           env:
             - name: POSTGRES_DB
-              value: calendar_db
+              value: calendar_dаb
             - name: POSTGRES_USER
               value: calendar_user
             - name: POSTGRES_PASSWORD

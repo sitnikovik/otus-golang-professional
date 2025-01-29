@@ -232,17 +232,20 @@ k8s-install-ingress-nginx:
 
 .PHONY: k8s-apply
 k8s-apply-services:
+	kubectl apply -f k8s/services/postgres/deployment.yaml
+	kubectl apply -f k8s/services/postgres/service.yaml
+	kubectl apply -f k8s/services/postgres/migrations.yaml
+	kubectl apply -f k8s/services/rabbitmq/deployment.yaml
+	kubectl apply -f k8s/services/rabbitmq/service.yaml
 	kubectl apply -f k8s/services/calendar/deployment.yaml
 	kubectl apply -f k8s/services/calendar/service.yaml
 	kubectl apply -f k8s/services/scheduler/deployment.yaml
 	kubectl apply -f k8s/services/scheduler/service.yaml
 	kubectl apply -f k8s/services/sender/deployment.yaml
 	kubectl apply -f k8s/services/sender/service.yaml
-	kubectl apply -f k8s/services/postgres/deployment.yaml
-	kubectl apply -f k8s/services/postgres/service.yaml
-	kubectl apply -f k8s/services/rabbitmq/deployment.yaml
-	kubectl apply -f k8s/services/rabbitmq/service.yaml
 	kubectl apply -f k8s/services/ingress.yaml
+
+	kubectl delete pod migrate-db
 
 .PHONY: k8s-delete-services
 k8s-delete-services:

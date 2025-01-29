@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: migrate-db
+spec:
+  containers:
+    - name: migrate
+      image: your-migration-image:latest
+      command: ["sh", "-c", "./migrations/postgres/up.sh"]
+      env:
+        - name: PG_DATABASE
+          value: calendar_db
+        - name: PG_USER
+          value: calendar_user
+        - name: PG_PASSWORD
+          value: calendar_password
+        - name: PG_HOST
+          value: calendar-pg
+        - name: PG_PORT
+          value: "5432"
+  restartPolicy: Never

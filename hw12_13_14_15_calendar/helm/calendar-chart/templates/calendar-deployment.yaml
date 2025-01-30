@@ -5,7 +5,7 @@ metadata:
   labels:
     app: calendar
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: calendar
@@ -16,16 +16,16 @@ spec:
     spec:
       containers:
         - name: calendar
-          image: calendar:develop
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           ports:
-            - containerPort: 8080
+            - containerPort: 8888
           env:
             - name: PG_DATABASE
-              value: calendar_db
+              value: {{ .Values.postgres.env.POSTGRES_DB }}
             - name: PG_USER
-              value: calendar_user
+              value: {{ .Values.postgres.env.POSTGRES_USER }}
             - name: PG_PASSWORD
-              value: calendar_password
+              value: {{ .Values.postgres.env.POSTGRES_PASSWORD }}
             - name: PG_HOST
               value: calendar-pg
             - name: PG_PORT

@@ -16,13 +16,13 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:13
+          image: {{ .Values.postgres.image }}
           env:
             - name: POSTGRES_DB
-              value: calendar_dаb
+              value: {{ .Values.postgres.env.POSTGRES_DB }}
             - name: POSTGRES_USER
-              value: calendar_user
+              value: {{ .Values.postgres.env.POSTGRES_USER }}
             - name: POSTGRES_PASSWORD
-              value: calendar_password
+              value: {{ .Values.postgres.env.POSTGRES_PASSWORD }}
           ports:
-            - containerPort: 5432
+            - containerPort: {{ .Values.postgres.servicePort }}

@@ -1,0 +1,43 @@
+replicaCount: 1
+
+image:
+  repository: calendar
+  tag: develop
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8888
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: calendar.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+postgres:
+  image: postgres:13
+  servicePort: 5432
+  env:
+    POSTGRES_DB: calendar_db
+    POSTGRES_USER: calendar_user
+    POSTGRES_PASSWORD: calendar_password
+
+rabbitmq:
+  image: rabbitmq:3-management
+  servicePort: 5672
+  managementPort: 15672
+
+scheduler:
+  image: scheduler:develop
+  servicePort: 8888
+
+sender:
+  image: sender:develop
+  servicePort: 8888

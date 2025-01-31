@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sender-app
+  labels:
+    app: sender
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: sender
+  template:
+    metadata:
+      labels:
+        app: sender
+    spec:
+      containers:
+        - name: sender
+          image: "{{ .Values.sender.image }}"
+          ports:
+            - containerPort: {{ .Values.sender.servicePort }}
+          env:
+            - name: PG_DATABASE
+              value: {{ .Values.postgres.env.POSTGRES_DB }}
+            - name: PG_USER
+              value: {{ .Values.postgres.env.POSTGRES_USER }}
+            - name: PG_PASSWORD
+              value: {{ .Values.postgres.env.POSTGRES_PASSWORD }}
+            - name: PG_HOST
+              value: calendar-pg
+            - name: PG_PORT
+              value: "5432"
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USER
+              value: guest
+            - name: RABBITMQ_PASSWORD
+              value: guest

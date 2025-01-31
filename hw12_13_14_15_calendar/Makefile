@@ -42,14 +42,17 @@ build: build-calendar-img build-scheduler-img build-sender-img
 
 .PHONY: build-calendar
 build-calendar:
+	eval $(minikube docker-env)
 	go build -v -o $(APP_BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
 
 .PHONY: build-scheduler
 build-scheduler:
+	eval $(minikube docker-env)
 	go build -v -o $(APP_BIN) -ldflags "$(LDFLAGS)" ./cmd/scheduler
 
 .PHONY: build-sender
 build-sender:
+	eval $(minikube docker-env)
 	go build -v -o $(APP_BIN) -ldflags "$(LDFLAGS)" ./cmd/sender
 
 .PHONY: run
@@ -199,3 +202,31 @@ generate: install-go-deps
 	--plugin=protoc-gen-go-grpc=bin/protoc-gen-go-grpc \
 	api/calendar/v1/EventService.proto
 ###< grpc ###
+
+###> k8s ###
+.PHONY: k8s
+k8s:
+	minikube start
+	minikube addons enable ingress
+	eval $$(minikube docker-env)
+	docker build -t calendar:develop -f build/calendar/Dockerfile .
+	docker build -t scheduler:develop -f build/scheduler/Dockerfile .
+	docker build -t sender:develop -f build/sender/Dockerfile .
+	helm uninstall calendar --ignore-not-found
+	helm install calendar ./helm/calendar-chart
+	@echo "Add the following to /etc/hosts:"
+	@echo "$$(minikube ip)  calendar.local"
+	@echo "Then open http://calendar.local in your browser."
+
+k8s-purge:
+	kubectl delete svc calendar-pg --ignore-not-found
+	kubectl delete svc calendar-service --ignore-not-found
+	kubectl delete svc rabbitmq --ignore-not-found
+	kubectl delete svc scheduler-service --ignore-not-found
+	kubectl delete svc sender-service --ignore-not-found
+	kubectl delete deployment calendar-app --ignore-not-found
+	kubectl delete deployment postgres --ignore-not-found
+	kubectl delete deployment rabbitmq --ignore-not-found
+	kubectl delete deployment scheduler-app --ignore-not-found
+	kubectl delete deployment sender-app --ignore-not-found
+	kubectl delete ingress calendar-ingress --ignore-not-found

@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calendar-app
+  labels:
+    app: calendar
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: calendar
+  template:
+    metadata:
+      labels:
+        app: calendar
+    spec:
+      containers:
+        - name: calendar
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 8888
+          env:
+            - name: PG_DATABASE
+              value: {{ .Values.postgres.env.POSTGRES_DB }}
+            - name: PG_USER
+              value: {{ .Values.postgres.env.POSTGRES_USER }}
+            - name: PG_PASSWORD
+              value: {{ .Values.postgres.env.POSTGRES_PASSWORD }}
+            - name: PG_HOST
+              value: calendar-pg
+            - name: PG_PORT
+              value: "5432"
